@@ -5,6 +5,7 @@
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
+[![PyPI](https://img.shields.io/pypi/v/github-talent-mcp)](https://pypi.org/project/github-talent-mcp/)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
@@ -51,7 +52,13 @@ Combined score = activity × 0.4 + relevance × 0.6. Relevance is keyword overla
 
 ## Installation
 
-### 1. Clone and install
+### 1. Install
+
+```bash
+pip install github-talent-mcp
+```
+
+Or install from source:
 
 ```bash
 git clone https://github.com/carolinacherry/github-talent-mcp.git
