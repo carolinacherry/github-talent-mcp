@@ -1,0 +1,21 @@
+[project]
+name = "github-talent-mcp"
+version = "0.1.0"
+description = "MCP server for searching, scoring, and ranking GitHub developers for technical recruiting"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+github-talent-mcp = "github_talent_mcp.server:main"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
