@@ -191,6 +191,17 @@ The final score is `max(behavioral_score, reputation_floor)`. If the floor is ap
 
 GitHub REST API: 5,000 requests/hour with token. A typical workflow (search + enrich 5 candidates + rank) uses ~60-100 API calls. Profile results are cached within a session to avoid redundant calls during ranking.
 
+## Security
+
+For reproducible installs with pinned versions, use the lockfile:
+
+```bash
+pip install -r requirements-lock.txt
+pip install github-talent-mcp
+```
+
+This pins every transitive dependency to the exact version tested against. If you're security-conscious about supply chain attacks, verify package hashes with [`pip-audit`](https://github.com/pypa/pip-audit) or install with `--require-hashes`.
+
 ## License
 
 MIT
