@@ -160,6 +160,48 @@ class GitHubClient:
         self._cache_set(cache_key, all_events)
         return all_events
 
+    async def search_commit_count(self, username: str, since_date: str) -> int:
+        """Count commits by username since a date using the Search API.
+
+        More accurate than Events API for users whose commits don't
+        surface as PushEvents (e.g. Torvalds' kernel merges).
+        """
+        cache_key = f"commit_count:{username}:{since_date}"
+        cached = self._cache_get(cache_key)
+        if cached is not None:
+            return cached
+        resp = await self._client.get(
+            "/search/commits",
+            params={
+                "q": f"author:{username} user:{username} committer-date:>={since_date}",
+                "per_page": 1,
+            },
+        )
+        self._check_rate_limit(resp)
+        resp.raise_for_status()
+        count = resp.json().get("total_count", 0)
+        self._cache_set(cache_key, count)
+        return count
+
+    async def search_pr_count(self, username: str, since_date: str) -> int:
+        """Count PRs opened by username since a date using the Search API."""
+        cache_key = f"pr_count:{username}:{since_date}"
+        cached = self._cache_get(cache_key)
+        if cached is not None:
+            return cached
+        resp = await self._client.get(
+            "/search/issues",
+            params={
+                "q": f"author:{username} type:pr created:>={since_date}",
+                "per_page": 1,
+            },
+        )
+        self._check_rate_limit(resp)
+        resp.raise_for_status()
+        count = resp.json().get("total_count", 0)
+        self._cache_set(cache_key, count)
+        return count
+
     async def get_profile_readme(self, username: str) -> str | None:
         cache_key = f"readme:{username}"
         cached = self._cache_get(cache_key)

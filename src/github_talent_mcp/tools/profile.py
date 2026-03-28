@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from github_talent_mcp.github_client import GitHubClient, PERMISSIVE_LICENSES
 from github_talent_mcp.models import DeveloperProfile, NotableRepo
@@ -110,7 +110,21 @@ async def _build_profile(client: GitHubClient, username: str) -> str:
             if repo_name and not repo_name.lower().startswith(f"{username.lower()}/"):
                 oss_contributions.add(repo_name)
 
-    # 7b. Fetch star counts for contributed repos (captures org repo impact)
+    # 7b. Fall back to Search API if Events API missed commits/PRs
+    if commits_90d == 0:
+        since_90d = (now - timedelta(days=90)).strftime("%Y-%m-%d")
+        commits_90d = await client.search_commit_count(username, since_90d)
+    if commits_30d == 0:
+        since_30d = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+        commits_30d = await client.search_commit_count(username, since_30d)
+    if prs_opened_90d == 0:
+        since_90d = (now - timedelta(days=90)).strftime("%Y-%m-%d")
+        prs_opened_90d = await client.search_pr_count(username, since_90d)
+    if prs_opened_30d == 0:
+        since_30d = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+        prs_opened_30d = await client.search_pr_count(username, since_30d)
+
+    # 7c. Fetch star counts for contributed repos (captures org repo impact)
     contributed_stars = 0
     for contrib_repo in sorted(oss_contributions)[:5]:  # cap at 5 to limit API calls
         parts = contrib_repo.split("/")
