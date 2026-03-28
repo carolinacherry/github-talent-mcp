@@ -71,7 +71,7 @@ class GitHubClient:
             for lang in languages:
                 parts.append(f"language:{lang}")
         if location:
-            parts.append(f"location:{location}")
+            parts.append(f'location:"{location}"')
         if min_followers is not None:
             parts.append(f"followers:>={min_followers}")
         if min_repos is not None:
