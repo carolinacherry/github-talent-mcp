@@ -26,13 +26,13 @@ Claude calls `get_developer_profile("torvalds")` and returns:
 | Followers | 293,321 |
 | Stars Received | 235,068 |
 | Primary Language | C (98.1%) |
-| Commits (90d) | 0 |
+| Commits (90d) | 0* |
 | PRs (90d) | 0 |
-| Notable Repos | linux (183K stars), libdc-for-dirk, subsurface-for-dirk, uemacs, pesern-resolve |
+| Notable Repos | linux (225K stars), AudioNoise, uemacs, GuitarPedal, test-tlb |
 | Profile README | No |
 | Hireable | No |
 
-Torvalds has zero recent GitHub activity because kernel development flows through mailing lists, not GitHub PRs. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
+*The commit count relies on GitHub's Events API, which only surfaces ~300 recent `PushEvent` entries. For Torvalds — whose contribution graph shows hundreds of commits per year — the Events API returns zero because kernel merges don't always generate push events. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
 
 ### Repo contributor ranking
 
@@ -162,7 +162,7 @@ The activity score combines two layers: **behavioral signals** (what you did rec
 
 ### Reputation Floor
 
-The behavioral score alone penalizes developers whose work doesn't produce GitHub events — Torvalds works through mailing lists, senior maintainers merge via org bots, and many engineers work in private repos.
+The behavioral score alone penalizes developers whose work doesn't produce GitHub Events API entries — Torvalds' kernel merges don't always surface as push events, senior maintainers merge via org bots, and many engineers work in private repos.
 
 The reputation floor ensures cumulative impact isn't erased by a quiet quarter:
 
