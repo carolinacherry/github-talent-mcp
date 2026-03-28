@@ -26,13 +26,13 @@ Claude calls `get_developer_profile("torvalds")` and returns:
 | Followers | 293,321 |
 | Stars Received | 235,068 |
 | Primary Language | C (98.1%) |
-| Commits (90d) | 0* |
+| Commits (90d) | 742 |
 | PRs (90d) | 0 |
 | Notable Repos | linux (225K stars), AudioNoise, uemacs, GuitarPedal, test-tlb |
 | Profile README | No |
 | Hireable | No |
 
-*The commit count relies on GitHub's Events API, which only surfaces ~300 recent `PushEvent` entries. For Torvalds — whose contribution graph shows hundreds of commits per year — the Events API returns zero because kernel merges don't always generate push events. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
+Torvalds has 0 PRs because kernel development flows through mailing lists, not GitHub PRs. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
 
 ### Repo contributor ranking
 
@@ -152,7 +152,7 @@ The activity score combines two layers: **behavioral signals** (what you did rec
 
 | Signal | Max Points | How |
 |---|---|---|
-| Commits + PRs (last 90 days) | 60 | Push commits + PR opens (PRs weighted x3). Captures both push-based and PR-based workflows. |
+| Commits + PRs (last 90 days) | 60 | Push commits + PR opens (PRs weighted x3). Uses the Events API first; falls back to the Search API when events return zero (see [note](#commit-counting)). |
 | Stars on repos | 40 | Personal repo stars + stars on repos you contribute to. Org repo maintainers get credit. |
 | Profile README | 20 | Presence of a profile README (github.com/username/username). |
 | Followers | 20 | Capped at 20. |
@@ -162,7 +162,7 @@ The activity score combines two layers: **behavioral signals** (what you did rec
 
 ### Reputation Floor
 
-The behavioral score alone penalizes developers whose work doesn't produce GitHub Events API entries — Torvalds' kernel merges don't always surface as push events, senior maintainers merge via org bots, and many engineers work in private repos.
+The behavioral score alone penalizes developers whose public work is limited — senior maintainers who merge via org bots, engineers who work primarily in private repos, or developers active on non-GitHub platforms.
 
 The reputation floor ensures cumulative impact isn't erased by a quiet quarter:
 
@@ -186,6 +186,15 @@ The final score is `max(behavioral_score, reputation_floor)`. If the floor is ap
 ### Ranking
 
 `rank_candidates` combines the activity score with a **relevance score** (0-100) based on keyword overlap between the job description and the candidate's profile (bio, languages, repo topics, README). The combined score weights relevance at 60% and activity at 40% — a high-activity developer with no overlap to the job shouldn't outrank a relevant one.
+
+### Commit Counting
+
+Commit and PR counts use a two-pass approach:
+
+1. **Events API** (`/users/{username}/events/public`) — fast, returns up to 300 recent events. Works for most active developers.
+2. **Search API fallback** — when the Events API returns zero commits or PRs, we query `/search/commits` and `/search/issues` scoped to the user's own repos (`user:{username}`). This catches activity that doesn't produce `PushEvent` entries, like Torvalds' kernel merges.
+
+The `user:` qualifier is required to avoid counting the same commit across thousands of forks. Without it, Torvalds returns ~2M (every fork of linux); with it, 742.
 
 ## Rate Limits
 
