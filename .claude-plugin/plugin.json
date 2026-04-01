@@ -1,0 +1,20 @@
+{
+  "name": "github-talent-mcp",
+  "version": "0.1.0",
+  "description": "Search, score, and rank GitHub developers for technical recruiting. Exposes 4 tools: search_developers, get_developer_profile, rank_candidates, get_repo_contributors.",
+  "author": {
+    "name": "carolinacherry"
+  },
+  "repository": "https://github.com/carolinacherry/github-talent-mcp",
+  "license": "MIT",
+  "keywords": ["recruiting", "github", "developer-tools", "talent", "mcp", "sourcing", "hiring"],
+  "mcpServers": {
+    "github-talent": {
+      "command": "uvx",
+      "args": ["github-talent-mcp"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

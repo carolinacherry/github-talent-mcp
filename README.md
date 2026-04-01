@@ -119,6 +119,22 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 Restart Claude Desktop. The tools will appear in the toolbox icon.
 
+## Claude Code Plugin
+
+Add this repo as a marketplace:
+```
+/plugin marketplace add carolinacherry/github-talent-mcp
+```
+Then install:
+```
+/plugin install github-talent-mcp@github-talent-marketplace
+```
+
+Or install directly via MCP:
+```bash
+GITHUB_TOKEN=ghp_xxxx claude mcp add github-talent -- uvx github-talent-mcp
+```
+
 ## Try It
 
 Once installed, paste these prompts to verify everything works:

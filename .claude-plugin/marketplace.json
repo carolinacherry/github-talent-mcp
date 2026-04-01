@@ -1,0 +1,23 @@
+{
+  "name": "github-talent-marketplace",
+  "owner": {
+    "name": "carolinacherry"
+  },
+  "metadata": {
+    "description": "GitHub developer search and ranking tools for technical recruiting"
+  },
+  "plugins": [
+    {
+      "name": "github-talent-mcp",
+      "description": "Search, score, and rank GitHub developers for technical recruiting. 4 tools: search_developers, get_developer_profile, rank_candidates, get_repo_contributors.",
+      "source": {
+        "source": "github",
+        "repo": "carolinacherry/github-talent-mcp"
+      },
+      "version": "0.1.0",
+      "homepage": "https://github.com/carolinacherry/github-talent-mcp",
+      "category": "developer-tools",
+      "keywords": ["recruiting", "github", "talent", "mcp", "sourcing", "hiring"]
+    }
+  ]
+}
