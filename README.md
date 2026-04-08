@@ -5,7 +5,6 @@
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
-[![PyPI](https://img.shields.io/pypi/v/github-talent-mcp)](https://pypi.org/project/github-talent-mcp/)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
@@ -26,13 +25,13 @@ Claude calls `get_developer_profile("torvalds")` and returns:
 | Followers | 293,321 |
 | Stars Received | 235,068 |
 | Primary Language | C (98.1%) |
-| Commits (90d) | 742 |
+| Commits (90d) | 0 |
 | PRs (90d) | 0 |
-| Notable Repos | linux (225K stars), AudioNoise, uemacs, GuitarPedal, test-tlb |
+| Notable Repos | linux (183K stars), libdc-for-dirk, subsurface-for-dirk, uemacs, pesern-resolve |
 | Profile README | No |
 | Hireable | No |
 
-Torvalds has 0 PRs because kernel development flows through mailing lists, not GitHub PRs. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
+Torvalds has zero recent GitHub activity because kernel development flows through mailing lists, not GitHub PRs. The **reputation floor** (293K followers) overrides the behavioral score and sets it to 150.
 
 ### Repo contributor ranking
 
@@ -52,13 +51,7 @@ Combined score = activity × 0.4 + relevance × 0.6. Relevance is keyword overla
 
 ## Installation
 
-### 1. Install
-
-```bash
-pip install github-talent-mcp
-```
-
-Or install from source:
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/carolinacherry/github-talent-mcp.git
@@ -96,7 +89,7 @@ Then set the token as an environment variable. Either:
 - Export it in your shell: `export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`
 - Or keep it in the `.env` file — the server reads it via `python-dotenv` on startup
 
-Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 4 tools under `github-talent`.
+Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 8 tools under `github-talent`.
 
 #### Claude Desktop
 
@@ -119,22 +112,6 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 Restart Claude Desktop. The tools will appear in the toolbox icon.
 
-## Claude Code Plugin
-
-Add this repo as a marketplace:
-```
-/plugin marketplace add carolinacherry/github-talent-mcp
-```
-Then install:
-```
-/plugin install github-talent-mcp@github-talent-marketplace
-```
-
-Or install directly via MCP:
-```bash
-GITHUB_TOKEN=ghp_xxxx claude mcp add github-talent -- uvx github-talent-mcp
-```
-
 ## Try It
 
 Once installed, paste these prompts to verify everything works:
@@ -151,6 +128,18 @@ Once installed, paste these prompts to verify everything works:
 **Repo contributors:**
 > Get the top contributors to huggingface/transformers and rank them for a founding ML engineer role at an AI startup
 
+**JD scoring:**
+> Score these candidates against this job description: [paste JD]. Candidates: tiangolo, karpathy, hwchase17
+
+**Compare candidates:**
+> Compare tiangolo and hwchase17 for a Senior Python AI Engineer role
+
+**Bulk scoring:**
+> Score these 10 GitHub usernames and give me a ranked table: [paste list]
+
+**Outreach:**
+> Generate a casual recruiter message for tiangolo about a Senior Python role at Acme. My name is Daniel.
+
 ## Tools
 
 | Tool | Description |
@@ -158,6 +147,10 @@ Once installed, paste these prompts to verify everything works:
 | `search_developers` | Search GitHub users by language, location, activity, followers. For topic-based sourcing, use `get_repo_contributors` on relevant repos instead. |
 | `get_developer_profile` | Deep profile enrichment: languages, stars, commits + PRs, OSS contributions, license breakdown, profile README, and activity score with breakdown. |
 | `rank_candidates` | Rank usernames against a job description. Returns sorted candidates with combined score, strengths, gaps, and reasoning. |
+| `score_against_jd` | Score candidates against a JD with per-dimension breakdown (tech stack, experience level, OSS signal, leadership). Returns gaps and personalized interview questions. |
+| `compare_candidates` | Side-by-side comparison of 2-5 candidates. Shows dimension winners and a recommendation. Optionally scored against a JD. |
+| `bulk_score` | Score up to 100 GitHub usernames in one call. Returns a ranked markdown table or CSV. Supports optional JD matching. |
+| `generate_outreach` | Generate personalized recruiter messages (short/medium/detailed) that reference the candidate's actual repos and contributions. Requires your company name and sender name. Casual or formal tone. |
 | `get_repo_contributors` | Top contributors for any repo. Accepts `owner/repo` or full URL. The fastest way to source for a specific domain. |
 
 ## Scoring
@@ -168,7 +161,7 @@ The activity score combines two layers: **behavioral signals** (what you did rec
 
 | Signal | Max Points | How |
 |---|---|---|
-| Commits + PRs (last 90 days) | 60 | Push commits + PR opens (PRs weighted x3). Uses the Events API first; falls back to the Search API when events return zero (see [note](#commit-counting)). |
+| Commits + PRs (last 90 days) | 60 | Push commits + PR opens (PRs weighted x3). Captures both push-based and PR-based workflows. |
 | Stars on repos | 40 | Personal repo stars + stars on repos you contribute to. Org repo maintainers get credit. |
 | Profile README | 20 | Presence of a profile README (github.com/username/username). |
 | Followers | 20 | Capped at 20. |
@@ -178,7 +171,7 @@ The activity score combines two layers: **behavioral signals** (what you did rec
 
 ### Reputation Floor
 
-The behavioral score alone penalizes developers whose public work is limited — senior maintainers who merge via org bots, engineers who work primarily in private repos, or developers active on non-GitHub platforms.
+The behavioral score alone penalizes developers whose work doesn't produce GitHub events — Torvalds works through mailing lists, senior maintainers merge via org bots, and many engineers work in private repos.
 
 The reputation floor ensures cumulative impact isn't erased by a quiet quarter:
 
@@ -203,29 +196,9 @@ The final score is `max(behavioral_score, reputation_floor)`. If the floor is ap
 
 `rank_candidates` combines the activity score with a **relevance score** (0-100) based on keyword overlap between the job description and the candidate's profile (bio, languages, repo topics, README). The combined score weights relevance at 60% and activity at 40% — a high-activity developer with no overlap to the job shouldn't outrank a relevant one.
 
-### Commit Counting
-
-Commit and PR counts use a two-pass approach:
-
-1. **Events API** (`/users/{username}/events/public`) — fast, returns up to 300 recent events. Works for most active developers.
-2. **Search API fallback** — when the Events API returns zero commits or PRs, we query `/search/commits` and `/search/issues` scoped to the user's own repos (`user:{username}`). This catches activity that doesn't produce `PushEvent` entries, like Torvalds' kernel merges.
-
-The `user:` qualifier is required to avoid counting the same commit across thousands of forks. Without it, Torvalds returns ~2M (every fork of linux); with it, 742.
-
 ## Rate Limits
 
 GitHub REST API: 5,000 requests/hour with token. A typical workflow (search + enrich 5 candidates + rank) uses ~60-100 API calls. Profile results are cached within a session to avoid redundant calls during ranking.
-
-## Security
-
-For reproducible installs with pinned versions, use the lockfile:
-
-```bash
-pip install -r requirements-lock.txt
-pip install github-talent-mcp
-```
-
-This pins every transitive dependency to the exact version tested against. If you're security-conscious about supply chain attacks, verify package hashes with [`pip-audit`](https://github.com/pypa/pip-audit) or install with `--require-hashes`.
 
 ## License
 

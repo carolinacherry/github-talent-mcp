@@ -12,6 +12,10 @@ from github_talent_mcp.tools.search import search_developers as _search
 from github_talent_mcp.tools.profile import get_developer_profile as _profile
 from github_talent_mcp.tools.rank import rank_candidates as _rank
 from github_talent_mcp.tools.contributors import get_repo_contributors as _contributors
+from github_talent_mcp.tools.score_jd import score_against_jd as _score_jd
+from github_talent_mcp.tools.compare import compare_candidates as _compare
+from github_talent_mcp.tools.bulk import bulk_score as _bulk
+from github_talent_mcp.tools.outreach import generate_outreach as _outreach
 
 load_dotenv()
 
@@ -100,6 +104,114 @@ async def rank_candidates(
         usernames=usernames,
         job_description=job_description,
         top_n=top_n,
+    )
+
+
+@mcp.tool()
+async def score_against_jd(
+    job_description: str,
+    usernames: list[str],
+    top_n: int = 10,
+) -> str:
+    """Score GitHub candidates against a job description with per-dimension breakdown.
+
+    Unlike rank_candidates (keyword matching), this extracts structured requirements
+    from the JD and scores each candidate on: tech stack match, experience level,
+    OSS signal, and leadership signals. Returns dimension scores, gaps, and
+    personalized interview questions.
+
+    Args:
+        job_description: Full job description text
+        usernames: GitHub usernames to evaluate
+        top_n: Number of top candidates to return (default 10)
+    """
+    return await _score_jd(
+        _get_client(),
+        job_description=job_description,
+        usernames=usernames,
+        top_n=top_n,
+    )
+
+
+@mcp.tool()
+async def compare_candidates(
+    usernames: list[str],
+    job_description: str | None = None,
+) -> str:
+    """Compare 2-5 GitHub candidates side-by-side.
+
+    Shows each candidate's languages, activity, stars, strengths, and gaps.
+    If a job description is provided, also scores each candidate against it
+    and picks winners per dimension.
+
+    Args:
+        usernames: 2-5 GitHub usernames to compare
+        job_description: Optional job description for JD-aware comparison
+    """
+    return await _compare(
+        _get_client(),
+        usernames=usernames,
+        job_description=job_description,
+    )
+
+
+@mcp.tool()
+async def bulk_score(
+    usernames: list[str],
+    job_description: str | None = None,
+    export_format: str = "markdown",
+    top_n: int = 100,
+) -> str:
+    """Score a batch of GitHub usernames and return a ranked table.
+
+    Enriches each profile and ranks by activity score (or JD fit if a job
+    description is provided). Returns a markdown table or CSV.
+
+    Args:
+        usernames: List of GitHub usernames (max 100)
+        job_description: Optional JD for relevance scoring
+        export_format: Output format - "markdown" (default) or "csv"
+        top_n: Max candidates in output (default 100)
+    """
+    return await _bulk(
+        _get_client(),
+        usernames=usernames,
+        job_description=job_description,
+        export_format=export_format,
+        top_n=top_n,
+    )
+
+
+@mcp.tool()
+async def generate_outreach(
+    username: str,
+    job_description: str,
+    company_name: str = "[Your Company]",
+    sender_name: str = "[Your Name]",
+    tone: str = "casual",
+) -> str:
+    """Generate personalized recruiter outreach messages for a GitHub candidate.
+
+    Creates three message variants (short, medium, detailed) that reference
+    the candidate's actual repos, contributions, and tech stack.
+
+    IMPORTANT: Always ask the user for their company_name and sender_name
+    before calling this tool. If not provided, placeholders will be used.
+
+    Args:
+        username: GitHub username of the candidate
+        job_description: The role description
+        company_name: Your company name (ask the user)
+        sender_name: Your name as the recruiter/hiring manager (ask the user)
+        tone: Message tone - "casual" (default) or "formal"
+    """
+    return await _outreach(
+        _get_client(),
+        username=username,
+        job_description=job_description,
+        company_name=company_name,
+        sender_name=sender_name,
+        tone=tone,
     )
 
 

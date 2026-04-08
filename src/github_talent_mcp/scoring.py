@@ -114,6 +114,179 @@ def compute_relevance_score(profile: dict[str, Any], job_keywords: list[str]) ->
     return min(int((matches / len(job_keywords)) * 100), 100)
 
 
+def score_jd_dimensions(profile: dict[str, Any], job_description: str) -> dict[str, Any]:
+    """Score a profile against a job description across structured dimensions.
+
+    Returns a dict with per-dimension scores (0-100), reasoning, gaps,
+    and suggested interview questions.
+    """
+    jd_lower = job_description.lower()
+    keywords = extract_keywords(job_description)
+
+    # --- Tech stack match (0-100) ---
+    # Match all JD keywords (not just a hardcoded set) against the full profile
+    profile_tech = " ".join([
+        " ".join(profile.get("top_languages", [])),
+        " ".join(r.get("language", "") or "" for r in profile.get("notable_repos", []) if isinstance(r, dict)),
+        " ".join(r.get("name", "") or "" for r in profile.get("notable_repos", []) if isinstance(r, dict)),
+        " ".join(r.get("description", "") or "" for r in profile.get("notable_repos", []) if isinstance(r, dict)),
+        " ".join(t for r in profile.get("notable_repos", []) if isinstance(r, dict) for t in (r.get("topics") or [])),
+        profile.get("profile_readme_summary") or "",
+        profile.get("bio") or "",
+        " ".join(profile.get("major_oss_contributions", [])),
+    ]).lower()
+
+    # Filter keywords to tech-relevant ones (skip soft skills, process words)
+    soft_terms = {
+        # Role/process words
+        "mentoring", "leadership", "communication", "collaboration",
+        "agile", "scrum", "remote", "hybrid", "onsite", "track", "record",
+        "open", "source", "contributions", "engineer", "engineering",
+        "developer", "build", "design", "implement", "maintain",
+        "senior", "staff", "principal", "lead", "manager",
+        "junior", "mid", "level", "familiar", "familiarity", "bonus", "nice",
+        "looking", "seeking", "ideal", "candidate", "responsible", "own",
+        "across", "help", "growth", "impact", "high",
+        # JD boilerplate
+        "requirements", "minimum", "qualifications", "preferred", "required",
+        "expect", "type", "full", "time", "part", "contract", "salary",
+        "benefits", "company", "team", "position", "opportunity",
+        "based", "features", "projects", "production", "software",
+        "applications", "understanding", "shipping", "building", "deep",
+        "join", "power", "have", "knowledge", "years", "experience",
+        "strong", "expertise", "multi", "resilient", "context", "aware",
+    }
+    tech_keywords = [kw for kw in keywords if kw not in soft_terms and not kw.endswith(".")]
+
+    if tech_keywords:
+        tech_matches = sum(1 for t in tech_keywords if t in profile_tech)
+        tech_score = min(int((tech_matches / len(tech_keywords)) * 100), 100)
+    else:
+        tech_score = 50  # no tech requirements specified
+
+    # --- Experience level match (0-100) ---
+    # Infer required seniority from JD
+    senior_terms = {"senior", "staff", "principal", "lead", "architect", "head", "director"}
+    mid_terms = {"mid", "intermediate", "ii", "iii"}
+    junior_terms = {"junior", "entry", "associate", "intern", "graduate"}
+
+    jd_words = set(jd_lower.split())
+    if jd_words & senior_terms:
+        required_level = "senior"
+    elif jd_words & junior_terms:
+        required_level = "junior"
+    elif jd_words & mid_terms:
+        required_level = "mid"
+    else:
+        required_level = "unknown"
+
+    # Estimate candidate level from signals
+    stars = profile.get("total_stars_received", 0)
+    followers = profile.get("followers", 0)
+    account_age = profile.get("account_age_days", 0)
+    oss_count = len(profile.get("major_oss_contributions", []))
+
+    if followers >= 500 or stars >= 1000 or (account_age > 2500 and oss_count >= 2):
+        candidate_level = "senior"
+    elif account_age > 1000 or stars >= 50:
+        candidate_level = "mid"
+    else:
+        candidate_level = "junior"
+
+    if required_level == "unknown":
+        exp_score = 60
+    elif required_level == candidate_level:
+        exp_score = 90
+    elif (required_level == "senior" and candidate_level == "mid"):
+        exp_score = 50
+    elif (required_level == "mid" and candidate_level == "senior"):
+        exp_score = 80  # overqualified but fine
+    elif (required_level == "junior" and candidate_level != "junior"):
+        exp_score = 70  # overqualified
+    else:
+        exp_score = 30
+
+    # --- OSS signal (0-100) ---
+    activity = profile.get("activity_score", 0)
+    oss_score = min(int((activity / 150) * 100), 100)
+
+    # --- Leadership signals (0-100) ---
+    leadership_score = 0
+    if profile.get("has_profile_readme"):
+        leadership_score += 20
+    if stars >= 100:
+        leadership_score += 20
+    if oss_count >= 1:
+        leadership_score += 25
+    if followers >= 100:
+        leadership_score += 15
+    desc_ratio = profile.get("repos_with_description_ratio", 0)
+    if desc_ratio >= 0.7:
+        leadership_score += 10
+    if profile.get("has_permissive_license_repos"):
+        leadership_score += 10
+    leadership_score = min(leadership_score, 100)
+
+    # --- Weighted overall ---
+    overall = int(tech_score * 0.35 + exp_score * 0.25 + oss_score * 0.25 + leadership_score * 0.15)
+
+    # --- Gaps ---
+    gaps = []
+    if tech_score < 50 and tech_keywords:
+        missing = [t for t in tech_keywords if t not in profile_tech]
+        if missing:
+            gaps.append(f"Missing from profile: {', '.join(missing[:5])}")
+    if exp_score < 50:
+        gaps.append(f"Experience level mismatch: role needs {required_level}, candidate appears {candidate_level}")
+    if oss_score < 30:
+        gaps.append("Low public GitHub activity signal")
+    if leadership_score < 30:
+        gaps.append("Few visible leadership/community signals")
+
+    # --- Interview questions ---
+    questions = []
+    top_langs = profile.get("top_languages", [])[:2]
+    repos = profile.get("notable_repos", [])
+    # Pick most relevant repo (highest star count that matches a JD keyword)
+    best_repo_name = None
+    if repos:
+        for repo in repos:
+            if not isinstance(repo, dict):
+                continue
+            repo_text = f"{repo.get('name', '')} {repo.get('description', '')}".lower()
+            if any(kw in repo_text for kw in tech_keywords):
+                best_repo_name = repo.get("name")
+                break
+        if not best_repo_name and isinstance(repos[0], dict):
+            best_repo_name = repos[0].get("name", "your top project")
+    if best_repo_name:
+        questions.append(f"Walk me through the architecture of {best_repo_name}.")
+    if gaps:
+        # Extract the actual missing items, not the label
+        first_gap = gaps[0]
+        if ":" in first_gap:
+            missing_items = first_gap.split(":", 1)[1].strip()
+            questions.append(f"What experience do you have with {missing_items}?")
+        else:
+            questions.append(f"Tell me about: {first_gap}")
+    if top_langs:
+        questions.append(f"What trade-offs have you hit working with {top_langs[0]} at scale?")
+
+    return {
+        "dimensions": {
+            "tech_stack_match": tech_score,
+            "experience_level": exp_score,
+            "oss_signal": oss_score,
+            "leadership_signals": leadership_score,
+        },
+        "overall_fit": overall,
+        "required_level": required_level,
+        "estimated_candidate_level": candidate_level,
+        "gaps": gaps,
+        "interview_questions": questions[:3],
+    }
+
+
 def generate_strengths_gaps(profile: dict[str, Any]) -> tuple[list[str], list[str]]:
     """Generate human-readable strengths and gaps from profile data."""
     strengths: list[str] = []
