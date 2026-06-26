@@ -1,7 +1,3 @@
-https://github.com/user-attachments/assets/b2dbe9e0-26ee-4849-861a-4b5cb268facc
-
-Sourcing candidates for a real Anthropic JD, live in Claude Cowork.
-
 # github-talent-mcp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -13,6 +9,10 @@ Sourcing candidates for a real Anthropic JD, live in Claude Cowork.
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
 ## Demo
+
+https://github.com/user-attachments/assets/b2dbe9e0-26ee-4849-861a-4b5cb268facc
+
+Sourcing candidates for a real Anthropic JD, live in Claude Cowork.
 
 https://github.com/user-attachments/assets/2dfd82b4-3eb5-4f2b-bc0a-2580b95043e4
 
