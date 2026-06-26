@@ -1,3 +1,7 @@
+https://github.com/user-attachments/assets/b2dbe9e0-26ee-4849-861a-4b5cb268facc
+
+Sourcing candidates for a real Anthropic JD, live in Claude Cowork.
+
 # github-talent-mcp
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
