@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import time
@@ -54,6 +55,59 @@ class GitHubClient:
             reset = resp.headers.get("X-RateLimit-Reset", "unknown")
             log.warning(f"Rate limit low: {remaining} remaining, resets at {reset}")
 
+    # -- Request wrapper with rate-limit backoff --
+
+    async def _get(
+        self,
+        url: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        max_retries: int = 3,
+    ) -> httpx.Response:
+        """GET with backoff on GitHub rate limits (primary + secondary) and 5xx.
+
+        Respects Retry-After and X-RateLimit-Reset so a broad sourcing run paces
+        itself instead of erroring out mid-job. Each wait is capped (60s) so an
+        exhausted hourly quota fails fast rather than hanging the session.
+        """
+        resp = await self._client.get(url, params=params, headers=headers)
+        for attempt in range(max_retries):
+            if not self._should_retry(resp):
+                return resp
+            delay = self._retry_after_seconds(resp, attempt)
+            log.warning(
+                f"GitHub {resp.status_code} on {url} — backing off {delay:.0f}s "
+                f"(retry {attempt + 1}/{max_retries})"
+            )
+            await asyncio.sleep(delay)
+            resp = await self._client.get(url, params=params, headers=headers)
+        return resp
+
+    @staticmethod
+    def _should_retry(resp: httpx.Response) -> bool:
+        if resp.status_code >= 500:
+            return True
+        if resp.status_code in (403, 429):
+            # Secondary limit sends Retry-After; primary limit zeroes Remaining.
+            if resp.headers.get("Retry-After"):
+                return True
+            if resp.headers.get("X-RateLimit-Remaining") == "0":
+                return True
+        return False
+
+    @staticmethod
+    def _retry_after_seconds(resp: httpx.Response, attempt: int) -> float:
+        retry_after = resp.headers.get("Retry-After", "")
+        if retry_after.isdigit():
+            return min(float(retry_after), 60.0)
+        if resp.headers.get("X-RateLimit-Remaining") == "0":
+            reset = resp.headers.get("X-RateLimit-Reset", "")
+            if reset.isdigit():
+                wait = float(reset) - time.time()
+                return min(max(wait, 0.0), 60.0) + 1.0
+        return min(2.0 ** attempt, 30.0)
+
     # -- API methods --
 
     async def search_users(
@@ -81,7 +135,7 @@ class GitHubClient:
         # Recent activity should be verified via get_developer_profile.
 
         q = " ".join(parts)
-        resp = await self._client.get(
+        resp = await self._get(
             "/search/users",
             params={"q": q, "per_page": per_page, "page": page, "sort": "followers", "order": "desc"},
         )
@@ -94,7 +148,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(f"/repos/{owner}/{repo}")
+        resp = await self._get(f"/repos/{owner}/{repo}")
         self._check_rate_limit(resp)
         resp.raise_for_status()
         data = resp.json()
@@ -106,7 +160,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(f"/users/{username}")
+        resp = await self._get(f"/users/{username}")
         self._check_rate_limit(resp)
         resp.raise_for_status()
         data = resp.json()
@@ -118,7 +172,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(
+        resp = await self._get(
             f"/users/{username}/repos",
             params={"per_page": per_page, "sort": "pushed", "direction": "desc", "type": "owner"},
         )
@@ -133,7 +187,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(f"/repos/{owner}/{repo}/languages")
+        resp = await self._get(f"/repos/{owner}/{repo}/languages")
         self._check_rate_limit(resp)
         resp.raise_for_status()
         data = resp.json()
@@ -147,7 +201,7 @@ class GitHubClient:
             return cached
         all_events: list[dict] = []
         for page in range(1, max_pages + 1):
-            resp = await self._client.get(
+            resp = await self._get(
                 f"/users/{username}/events/public",
                 params={"per_page": 100, "page": page},
             )
@@ -170,7 +224,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(
+        resp = await self._get(
             "/search/commits",
             params={
                 "q": f"author:{username} user:{username} committer-date:>={since_date}",
@@ -189,7 +243,7 @@ class GitHubClient:
         cached = self._cache_get(cache_key)
         if cached is not None:
             return cached
-        resp = await self._client.get(
+        resp = await self._get(
             "/search/issues",
             params={
                 "q": f"author:{username} type:pr created:>={since_date}",
@@ -208,7 +262,7 @@ class GitHubClient:
         if cached is not None:
             return cached
         try:
-            resp = await self._client.get(
+            resp = await self._get(
                 f"/repos/{username}/{username}/readme",
                 headers={"Accept": "application/vnd.github.raw+json"},
             )
@@ -224,7 +278,7 @@ class GitHubClient:
     async def get_repo_contributors(
         self, owner: str, repo: str, per_page: int = 30,
     ) -> list[dict]:
-        resp = await self._client.get(
+        resp = await self._get(
             f"/repos/{owner}/{repo}/contributors",
             params={"per_page": per_page},
         )
