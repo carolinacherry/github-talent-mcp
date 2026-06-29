@@ -4,9 +4,12 @@
 [![Python 3.14+](https://img.shields.io/badge/Python-3.14+-blue.svg)](https://www.python.org)
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
+[![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
+
+Works with **Claude** (Code & Desktop) and **GitHub Copilot** (CLI & desktop app) — any MCP client that speaks stdio.
 
 ## Demo
 
