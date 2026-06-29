@@ -116,6 +116,32 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 Restart Claude Desktop. The tools will appear in the toolbox icon.
 
+#### GitHub Copilot (CLI & desktop app)
+
+The [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) and the [GitHub Copilot app](https://github.com/features/ai/github-app) share one MCP config, so a single setup covers both.
+
+Add it to `~/.copilot/mcp-config.json` (global), or commit a `.copilot/mcp-config.json` in your repo — the Copilot app picks that up automatically:
+
+```json
+{
+  "mcpServers": {
+    "github-talent": {
+      "type": "local",
+      "command": "uvx",
+      "args": ["github-talent-mcp"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "tools": ["*"]
+    }
+  }
+}
+```
+
+Export your token first (`export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`) — Copilot only inherits `PATH`, so the `${GITHUB_TOKEN}` reference reads it from your shell. If `uvx` isn't on your `PATH`, use its absolute path as `command`.
+
+The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 8 tools under `github-talent`.
+
 ## Try It
 
 Once installed, paste these prompts to verify everything works:

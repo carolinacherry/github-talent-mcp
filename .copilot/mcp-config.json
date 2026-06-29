@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "github-talent": {
+      "type": "local",
+      "command": "uvx",
+      "args": ["github-talent-mcp"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "tools": ["*"]
+    }
+  }
+}
