@@ -9,6 +9,10 @@ from typing import Any
 import httpx
 
 GITHUB_API = "https://api.github.com"
+# Cap each backoff wait so a single tool call can't stall long enough to trip
+# an MCP client's request timeout. Brief secondary limits get smoothed; a fully
+# drained quota fails fast with a clear error instead of hanging.
+MAX_BACKOFF_SECONDS = 8.0
 PERMISSIVE_LICENSES = frozenset({
     "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "isc", "unlicense",
 })
@@ -63,7 +67,7 @@ class GitHubClient:
         *,
         params: dict | None = None,
         headers: dict | None = None,
-        max_retries: int = 3,
+        max_retries: int = 2,
     ) -> httpx.Response:
         """GET with backoff on GitHub rate limits (primary + secondary) and 5xx.
 
@@ -100,13 +104,13 @@ class GitHubClient:
     def _retry_after_seconds(resp: httpx.Response, attempt: int) -> float:
         retry_after = resp.headers.get("Retry-After", "")
         if retry_after.isdigit():
-            return min(float(retry_after), 60.0)
+            return min(float(retry_after), MAX_BACKOFF_SECONDS)
         if resp.headers.get("X-RateLimit-Remaining") == "0":
             reset = resp.headers.get("X-RateLimit-Reset", "")
             if reset.isdigit():
-                wait = float(reset) - time.time()
-                return min(max(wait, 0.0), 60.0) + 1.0
-        return min(2.0 ** attempt, 30.0)
+                wait = float(reset) - time.time() + 1.0
+                return min(max(wait, 0.0), MAX_BACKOFF_SECONDS)
+        return min(2.0 ** attempt, MAX_BACKOFF_SECONDS)
 
     # -- API methods --
 

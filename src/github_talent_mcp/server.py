@@ -53,6 +53,12 @@ async def search_developers(
     For topic-based sourcing (e.g. "LLM", "inference"), use get_repo_contributors
     on relevant repos instead — GitHub user search doesn't support topic/bio search.
 
+    Intake first — do not guess. Before searching, confirm the key criteria with
+    the user if missing: languages, location (or remote/timezone), seniority, and
+    2-4 must-have skills. If sourcing for a specific role, also ask the user to
+    paste the job description or share a public link to it. Ask concise follow-up
+    questions FIRST rather than firing a broad, low-signal search.
+
     Args:
         languages: Filter by programming languages, e.g. ["python", "rust"]
         location: Filter by location, e.g. "San Francisco" or "Germany"
@@ -94,6 +100,13 @@ async def rank_candidates(
     Enriches each profile, scores activity + relevance, and returns candidates
     sorted by combined score with strengths, gaps, and reasoning.
 
+    Intake first — do not guess. Before calling, make sure you have the real job
+    description: ask the user to paste the full JD text, or to share a public link
+    to the posting and paste what it shows (you may not be able to open the link
+    yourself). Also confirm target seniority, 2-4 must-have skills, location or
+    remote/timezone, and any hard dealbreakers. If the request is missing these,
+    ask concise follow-up questions FIRST, then call this tool.
+
     Args:
         usernames: GitHub usernames to evaluate
         job_description: The role description to rank candidates against
@@ -119,6 +132,13 @@ async def score_against_jd(
     from the JD and scores each candidate on: tech stack match, experience level,
     OSS signal, and leadership signals. Returns dimension scores, gaps, and
     personalized interview questions.
+
+    Intake first — do not guess. Before calling, make sure you have the real job
+    description: ask the user to paste the full JD text, or to share a public link
+    to the posting and paste what it shows (you may not be able to open the link
+    yourself). Also confirm target seniority, 2-4 must-have skills, location or
+    remote/timezone, and any hard dealbreakers. Ask concise follow-up questions
+    FIRST if any are missing, then call this tool.
 
     Args:
         job_description: Full job description text

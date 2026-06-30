@@ -36,7 +36,7 @@ def _mock_profile(username, **overrides):
 async def test_bulk_markdown():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.bulk.get_developer_profile", new_callable=AsyncMock) as mock:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock:
         mock.side_effect = [
             _mock_profile("alice", activity_score=150, total_stars_received=500),
             _mock_profile("bob", activity_score=60, total_stars_received=10),
@@ -56,7 +56,7 @@ async def test_bulk_markdown():
 async def test_bulk_csv():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.bulk.get_developer_profile", new_callable=AsyncMock) as mock:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock:
         mock.side_effect = [
             _mock_profile("alice", activity_score=100),
             _mock_profile("bob", activity_score=50),
@@ -73,7 +73,7 @@ async def test_bulk_csv():
 async def test_bulk_with_jd():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.bulk.get_developer_profile", new_callable=AsyncMock) as mock:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock:
         mock.side_effect = [
             _mock_profile("alice", top_languages=["Python", "Rust"], activity_score=120,
                           followers=500, total_stars_received=300, account_age_days=3000),
@@ -93,7 +93,7 @@ async def test_bulk_with_jd():
 async def test_bulk_handles_errors():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.bulk.get_developer_profile", new_callable=AsyncMock) as mock:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock:
         mock.side_effect = [
             json.dumps({"error": "Not found"}),
             _mock_profile("bob"),
