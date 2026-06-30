@@ -16,6 +16,7 @@ from github_talent_mcp.tools.score_jd import score_against_jd as _score_jd
 from github_talent_mcp.tools.compare import compare_candidates as _compare
 from github_talent_mcp.tools.bulk import bulk_score as _bulk
 from github_talent_mcp.tools.outreach import generate_outreach as _outreach
+from github_talent_mcp.tools.plan_search import plan_search as _plan_search
 
 load_dotenv()
 
@@ -34,6 +35,24 @@ def _get_client() -> GitHubClient:
             logging.warning("GITHUB_TOKEN not set — API requests limited to 60/hr")
         _client = GitHubClient(token=token)
     return _client
+
+
+@mcp.tool()
+async def plan_search(request: str, job_description: str | None = None) -> str:
+    """Plan a candidate search and surface follow-up questions BEFORE sourcing.
+
+    Call this FIRST whenever the user asks to find, source, rank, or score
+    candidates. It parses their request, detects the role family, and returns
+    targeted follow-up questions plus what's still missing. Ask the user those
+    questions — especially to paste the job description or share a public link to
+    it — and wait for answers before calling search_developers, rank_candidates,
+    or score_against_jd. Do not guess missing criteria.
+
+    Args:
+        request: The user's natural-language sourcing request, verbatim.
+        job_description: The job description text, if the user already provided it.
+    """
+    return await _plan_search(request, job_description=job_description)
 
 
 @mcp.tool()
