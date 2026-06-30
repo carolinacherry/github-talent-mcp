@@ -1,13 +1,14 @@
 [build-system]
-requires = ["setuptools>=68.0", "wheel"]
+requires = ["setuptools>=77.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "github-talent-mcp"
-version = "0.4.0"
+version = "0.4.1"
 description = "MCP server for searching, scoring, and ranking GitHub developers for technical recruiting"
 readme = "README.md"
-license = {text = "MIT"}
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.10"
 authors = [
     {name = "Carolina Cherry"},
@@ -16,7 +17,6 @@ keywords = ["mcp", "github", "recruiting", "developer-tools", "claude"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

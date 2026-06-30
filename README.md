@@ -1,6 +1,6 @@
 # github-talent-mcp
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.14+](https://img.shields.io/badge/Python-3.14+-blue.svg)](https://www.python.org)
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
@@ -253,4 +253,4 @@ This tool scores **public GitHub activity** as *one* signal for technical sourci
 
 ## License
 
-MIT
+[Apache License 2.0](LICENSE) © 2026 Daniel An. Released versions up to and including 0.4.0 remain under the MIT License; 0.4.1 onward is Apache-2.0.
