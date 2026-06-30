@@ -96,7 +96,7 @@ Then set the token as an environment variable. Either:
 - Export it in your shell: `export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`
 - Or keep it in the `.env` file — the server reads it via `python-dotenv` on startup
 
-Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 8 tools under `github-talent`.
+Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 9 tools under `github-talent`.
 
 #### Claude Desktop
 
@@ -143,7 +143,7 @@ Add it to `~/.copilot/mcp-config.json` (global), or commit a `.copilot/mcp-confi
 
 Export your token first (`export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`) — Copilot only inherits `PATH`, so the `${GITHUB_TOKEN}` reference reads it from your shell. If `uvx` isn't on your `PATH`, use its absolute path as `command`.
 
-The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 8 tools under `github-talent`.
+The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 9 tools under `github-talent`.
 
 ## Try It
 
@@ -177,6 +177,7 @@ Once installed, paste these prompts to verify everything works:
 
 | Tool | Description |
 |---|---|
+| `plan_search` | Intake step — parses a sourcing request, detects the role family, and returns targeted follow-up questions (including: paste the JD or share a public link) to ask before searching. Call this first. |
 | `search_developers` | Search GitHub users by language, location, activity, followers. For topic-based sourcing, use `get_repo_contributors` on relevant repos instead. |
 | `get_developer_profile` | Deep profile enrichment: languages, stars, commits + PRs, OSS contributions, license breakdown, profile README, and activity score with breakdown. |
 | `rank_candidates` | Rank usernames against a job description. Returns sorted candidates with combined score, strengths, gaps, and reasoning. |
@@ -232,6 +233,15 @@ The final score is `max(behavioral_score, reputation_floor)`. If the floor is ap
 ## Rate Limits
 
 GitHub REST API: 5,000 requests/hour with token. A typical workflow (search + enrich 5 candidates + rank) uses ~60-100 API calls. Profile results are cached within a session to avoid redundant calls during ranking.
+
+## Limitations & responsible use
+
+This tool scores **public GitHub activity** as *one* signal for technical sourcing. Know its limits before you rely on it:
+
+- **Results vary between runs.** It's AI-driven — the assistant decides which repos and searches to explore, so the same prompt can surface a different shortlist each time. The scoring itself is deterministic for a given set of candidates; the variation comes from sourcing. For repeatable runs, constrain the sourcing: name the repos to pull contributors from, or hand it an explicit list of usernames to rank.
+- **GitHub is not the whole engineer.** Public activity is strong evidence of *technical* work but blind to private-repo and internal/enterprise contributions, and to non-GitHub ecosystems (mailing lists, GitLab, etc.). It **cannot** verify people-management or leadership history — confirm those off-GitHub. (The reputation floor exists precisely because low recent activity ≠ low capability.)
+- **Use it as a lead generator, not a filter.** Public OSS visibility correlates with free time, tenure, and circumstance — not just skill — and that skews across demographics. Treat scores as a starting point for outreach and human judgment. Don't use them to automatically exclude candidates, and always pair them with equitable, role-relevant evaluation.
+- **Data is live and rate-limited.** Scores reflect GitHub at query time and shift as activity changes; an unauthenticated server is capped at 60 requests/hour.
 
 ## License
 
