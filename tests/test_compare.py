@@ -36,7 +36,7 @@ def _mock_profile(username, **overrides):
 async def test_compare_two_candidates():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.compare.get_developer_profile", new_callable=AsyncMock) as mock_profile:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock_profile:
         mock_profile.side_effect = [
             _mock_profile("alice", followers=500, total_stars_received=200),
             _mock_profile("bob", followers=50, total_stars_received=10),
@@ -55,7 +55,7 @@ async def test_compare_two_candidates():
 async def test_compare_with_jd():
     client = AsyncMock()
 
-    with patch("github_talent_mcp.tools.compare.get_developer_profile", new_callable=AsyncMock) as mock_profile:
+    with patch("github_talent_mcp.tools.profile.get_developer_profile", new_callable=AsyncMock) as mock_profile:
         mock_profile.side_effect = [
             _mock_profile(
                 "alice", top_languages=["Python", "Rust"], activity_score=150,

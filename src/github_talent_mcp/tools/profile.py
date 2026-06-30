@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from datetime import datetime, timedelta, timezone
@@ -8,12 +9,39 @@ from github_talent_mcp.github_client import GitHubClient, PERMISSIVE_LICENSES
 from github_talent_mcp.models import DeveloperProfile, NotableRepo
 from github_talent_mcp.scoring import compute_activity_score
 
+# Bounded concurrency for multi-candidate enrichment. Keeps wall-clock low
+# enough to finish inside an MCP client's request timeout without bursting
+# the GitHub API so hard that every call hits a rate limit.
+ENRICH_CONCURRENCY = 5
+
 
 async def get_developer_profile(client: GitHubClient, username: str) -> str:
     try:
         return await _build_profile(client, username)
     except Exception as e:
         return json.dumps({"error": f"Failed to build profile for {username}: {e}"})
+
+
+async def enrich_profiles(
+    client: GitHubClient,
+    usernames: list[str],
+    *,
+    concurrency: int = ENRICH_CONCURRENCY,
+) -> dict[str, dict]:
+    """Fetch developer profiles for many usernames concurrently (bounded).
+
+    Returns username -> parsed profile dict (including ``{"error": ...}`` entries
+    for any that fail) so callers can still iterate ``usernames`` in their
+    original order. The client's rate-limit backoff handles any limits hit.
+    """
+    sem = asyncio.Semaphore(concurrency)
+
+    async def _one(username: str) -> tuple[str, dict]:
+        async with sem:
+            return username, json.loads(await get_developer_profile(client, username))
+
+    pairs = await asyncio.gather(*(_one(u) for u in usernames))
+    return dict(pairs)
 
 
 async def _build_profile(client: GitHubClient, username: str) -> str:

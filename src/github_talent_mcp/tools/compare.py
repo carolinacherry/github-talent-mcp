@@ -4,7 +4,7 @@ import json
 
 from github_talent_mcp.github_client import GitHubClient
 from github_talent_mcp.scoring import score_jd_dimensions, generate_strengths_gaps
-from github_talent_mcp.tools.profile import get_developer_profile
+from github_talent_mcp.tools.profile import enrich_profiles
 
 
 async def compare_candidates(
@@ -21,9 +21,9 @@ async def compare_candidates(
 
     candidates = []
 
+    profiles = await enrich_profiles(client, usernames)
     for username in usernames:
-        profile_json = await get_developer_profile(client, username)
-        profile = json.loads(profile_json)
+        profile = profiles[username]
 
         if "error" in profile:
             candidates.append({
