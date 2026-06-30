@@ -173,6 +173,14 @@ Once installed, paste these prompts to verify everything works:
 **Outreach:**
 > Generate a casual recruiter message for tiangolo about a Senior Python role at Acme. My name is Daniel.
 
+## Interview-first sourcing
+
+Vague prompts produce vague shortlists, so the server is built to **interview you before it searches**. Ask it to "find candidates for a role" and it calls `plan_search` first — it detects the role family and asks targeted follow-ups (seniority, must-have skills, location, dealbreakers) and, most importantly, for the **job description**: paste the full text, or share a public link and paste what it shows. It only sources once it has real criteria.
+
+> **Try it:** *"Find me senior security engineers."* → the assistant should ask for the JD and your must-haves before running anything.
+
+Want a fast, repeatable run instead? Give it everything up front — *"Rank these 15 usernames against this JD: …"* — or pin the sourcing to specific repos, and it'll skip the interview.
+
 ## Tools
 
 | Tool | Description |
