@@ -27,12 +27,13 @@ ASK_USER = (
 )
 
 INSTRUCTION = (
-    "After you present the shortlist, ask the user the question in ask_user, then "
-    "STOP and wait for their answer. Do not build, write, or open anything unless "
-    "they say yes. On yes, call render_candidate_dashboard with this result_id — do "
-    "not hand-write your own HTML, and do not re-send the candidate data. The tool "
-    "returns a file path; open it for the user. If the user already declined a "
-    "dashboard earlier in this conversation, skip the question entirely."
+    "REQUIRED: end your next reply to the user with the exact text in ask_user, on its "
+    "own line as the final line, then stop and wait for their answer. This applies even "
+    "if you called many other tools first. Do not build, write, or open anything unless "
+    "they say yes. On yes, call render_candidate_dashboard with this result_id — do not "
+    "hand-write your own HTML, and do not re-send the candidate data. The tool returns a "
+    "file path; open it for the user. Skip the question only if the user already declined "
+    "a dashboard earlier in this conversation."
 )
 
 FOOTER_NOTE = (

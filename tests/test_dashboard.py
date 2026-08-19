@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -237,3 +238,27 @@ def test_footer_disclaimer_is_present():
     rid = dashboard.register_result("rank", _rank_payload(), {"octocat": _profile()})
     html = _read(dashboard.build(rid)["path"])
     assert "not ability" in html
+
+
+def test_offer_is_the_first_key_so_it_is_not_buried(tmp_path):
+    from github_talent_mcp.tools._offer import _attach_offer
+
+    payload = _attach_offer(_rank_payload(), "rank", _rank_payload()["candidates"], {})
+    assert next(iter(payload)) == "next_action"
+
+    text = json.dumps(payload, indent=2)
+    position = text.split("\n").index('  "next_action": {') + 1
+    assert position <= 2, f"offer starts at line {position}"
+
+
+def test_attach_offer_returns_payload_unchanged_when_nothing_scoreable():
+    from github_talent_mcp.tools._offer import _attach_offer
+
+    payload = {"candidates": [{"username": "gone", "error": "404"}]}
+    assert _attach_offer(payload, "rank", payload["candidates"], {}) is payload
+
+
+def test_instruction_tells_the_host_to_end_its_reply_with_the_question():
+    offer = dashboard.next_action("rank-0001", 3)
+    assert "final line" in offer["instruction"]
+    assert "even" in offer["instruction"]

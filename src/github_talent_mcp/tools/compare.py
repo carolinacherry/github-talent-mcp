@@ -98,5 +98,5 @@ async def compare_candidates(
         "winners": winners,
         "recommendation": recommendation,
     }
-    _attach_offer(payload, "compare", candidates, profiles)
+    payload = _attach_offer(payload, "compare", candidates, profiles)
     return json.dumps(payload, indent=2)

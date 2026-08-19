@@ -81,7 +81,7 @@ async def bulk_score(
         "errors": errors[:5],
         "table": output,
     }
-    _attach_offer(payload, "bulk", rows, profiles, cache_payload={"rows": rows})
+    payload = _attach_offer(payload, "bulk", rows, profiles, cache_payload={"rows": rows})
     return json.dumps(payload, indent=2)
 
 
