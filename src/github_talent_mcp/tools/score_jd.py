@@ -69,5 +69,5 @@ async def score_against_jd(
         "total_evaluated": len(results),
         "candidates": results[:top_n],
     }
-    payload = _attach_offer(payload, "score_jd", payload["candidates"], profiles)
+    payload = _attach_offer(payload, payload["candidates"])
     return json.dumps(payload, indent=2)

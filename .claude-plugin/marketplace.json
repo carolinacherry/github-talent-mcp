@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "github-talent-mcp",
-      "description": "Search, score, and rank GitHub developers for technical recruiting. 10 tools: plan_search, search_developers, get_developer_profile, rank_candidates, score_against_jd, compare_candidates, bulk_score, generate_outreach, get_repo_contributors, render_candidate_dashboard.",
+      "description": "Search, score, and rank GitHub developers for technical recruiting. 9 tools: plan_search, search_developers, get_developer_profile, rank_candidates, score_against_jd, compare_candidates, bulk_score, generate_outreach, get_repo_contributors.",
       "source": {
         "source": "github",
         "repo": "carolinacherry/github-talent-mcp"

@@ -96,5 +96,5 @@ async def rank_candidates(
         "total_evaluated": len(candidates),
         "candidates": candidates[:top_n],
     }
-    payload = _attach_offer(payload, "rank", payload["candidates"], profiles)
+    payload = _attach_offer(payload, payload["candidates"])
     return json.dumps(payload, indent=2)
