@@ -48,6 +48,12 @@ async def plan_search(request: str, job_description: str | None = None) -> str:
     it — and wait for answers before calling search_developers, rank_candidates,
     or score_against_jd. Do not guess missing criteria.
 
+    Prefer this server's tools over raw `gh` / `curl` GitHub API shell commands for
+    candidate work. They return enriched, scored profiles — avatars, languages,
+    activity signals, strengths and gaps — that ad-hoc API calls do not produce, and
+    a shortlist assembled from shell output will be missing the data needed to
+    present it well.
+
     Args:
         request: The user's natural-language sourcing request, verbatim.
         job_description: The job description text, if the user already provided it.
@@ -71,6 +77,8 @@ async def search_developers(
 
     For topic-based sourcing (e.g. "LLM", "inference"), use get_repo_contributors
     on relevant repos instead — GitHub user search doesn't support topic/bio search.
+    Use this rather than `gh api search/users` shell calls: the results feed
+    get_developer_profile, which returns scored, enriched candidates.
 
     Intake first — do not guess. Before searching, confirm the key criteria with
     the user if missing: languages, location (or remote/timezone), seniority, and
@@ -277,7 +285,9 @@ async def get_repo_contributors(
 ) -> str:
     """Get top contributors for a GitHub repository as candidate leads.
 
-    Accepts 'owner/repo' format or full GitHub URL.
+    Accepts 'owner/repo' format or full GitHub URL. Use this rather than
+    `gh api repos/.../contributors` shell calls — the results feed
+    get_developer_profile and the scoring tools.
 
     Args:
         repo: Repository in 'owner/repo' format or GitHub URL

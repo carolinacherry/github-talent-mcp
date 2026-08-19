@@ -65,3 +65,20 @@ def test_offer_still_fires_when_only_some_candidates_failed():
 def test_no_offer_on_an_empty_result():
     payload = {"candidates": []}
     assert _attach_offer(payload, []) is payload
+
+
+def test_sourcing_tools_get_a_conditional_offer():
+    """The common shortlist path is contributors -> profiles -> the model writes the
+    table itself, never touching a scoring tool. The offer has to reach that path."""
+    leads = [{"login": "octocat"}, {"login": "hubot"}]
+    payload = _attach_offer({"contributors": leads}, leads, conditional=True)
+    instruction = payload["next_action"]["instruction"]
+    assert instruction.startswith("If your next reply to the user presents a shortlist")
+    assert "end your next reply" in instruction
+    assert payload["next_action"]["ask_user"] == _offer.ASK_USER
+
+
+def test_scoring_tools_keep_the_unconditional_offer():
+    entries = _candidates()
+    instruction = _attach_offer({"candidates": entries}, entries)["next_action"]["instruction"]
+    assert instruction.startswith("REQUIRED:")

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 
 
 async def search_developers(
@@ -35,9 +36,10 @@ async def search_developers(
             "html_url": item.get("html_url", f"https://github.com/{item['login']}"),
         })
 
-    return json.dumps({
+    payload = {
         "total_count": data.get("total_count", 0),
         "returned": len(results),
         "note": "Use get_developer_profile on candidates for full enrichment with activity scoring.",
         "developers": results,
-    }, indent=2)
+    }
+    return json.dumps(_attach_offer(payload, results, conditional=True), indent=2)

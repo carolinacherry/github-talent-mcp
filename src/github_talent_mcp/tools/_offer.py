@@ -37,20 +37,27 @@ def prompt_enabled() -> bool:
     return os.environ.get(PROMPT_ENV, "1").strip().lower() not in {"0", "false", "no", "off"}
 
 
-def _attach_offer(payload: dict, entries: list[dict]) -> dict:
-    """Prepend the dashboard offer, unless disabled or nothing is scoreable.
+# Sourcing tools feed shortlists the model assembles itself, so the offer has to be
+# conditional there — a single profile lookup is not a shortlist.
+SOURCING_INSTRUCTION = (
+    "If your next reply to the user presents a shortlist of candidates, then " + INSTRUCTION[10:]
+)
+
+
+def _attach_offer(payload: dict, entries: list[dict], *, conditional: bool = False) -> dict:
+    """Prepend the dashboard offer, unless disabled or nothing usable came back.
 
     The offer goes FIRST: appended to a long candidate payload it lands ~96% of the
     way down, and hosts routinely skim past it after a long tool chain.
     """
-    scoreable = [e for e in entries if isinstance(e, dict) and not e.get("error")]
-    if not scoreable or not prompt_enabled():
+    usable = [e for e in entries if isinstance(e, dict) and not e.get("error")]
+    if not usable or not prompt_enabled():
         return payload
     return {
         "next_action": {
             "type": "offer_dashboard",
             "ask_user": ASK_USER,
-            "instruction": INSTRUCTION,
+            "instruction": SOURCING_INSTRUCTION if conditional else INSTRUCTION,
         },
         **payload,
     }
