@@ -9,10 +9,13 @@ from typing import Any
 import httpx
 
 GITHUB_API = "https://api.github.com"
-# Cap each backoff wait so a single tool call can't stall long enough to trip
-# an MCP client's request timeout. Brief secondary limits get smoothed; a fully
-# drained quota fails fast with a clear error instead of hanging.
-MAX_BACKOFF_SECONDS = 8.0
+# When GitHub sends Retry-After it is telling us exactly when the throttle lifts,
+# so honour it — waiting less than it asks guarantees the retry fails too. Capped
+# so a single tool call can't stall past an MCP client's request timeout; a longer
+# wait than this fails fast with a clear error instead of burning an attempt early.
+MAX_BACKOFF_SECONDS = 30.0
+# Total time one call may spend sleeping across all its retries.
+MAX_TOTAL_BACKOFF_SECONDS = 35.0
 PERMISSIVE_LICENSES = frozenset({
     "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "isc", "unlicense",
 })
@@ -72,19 +75,27 @@ class GitHubClient:
         """GET with backoff on GitHub rate limits (primary + secondary) and 5xx.
 
         Respects Retry-After and X-RateLimit-Reset so a broad sourcing run paces
-        itself instead of erroring out mid-job. Each wait is capped (60s) so an
-        exhausted hourly quota fails fast rather than hanging the session.
+        itself instead of erroring out mid-job. Waits are capped, and a throttle
+        longer than the cap fails fast rather than retrying too early.
         """
         resp = await self._client.get(url, params=params, headers=headers)
+        slept = 0.0
         for attempt in range(max_retries):
             if not self._should_retry(resp):
                 return resp
             delay = self._retry_after_seconds(resp, attempt)
+            if slept + delay > MAX_TOTAL_BACKOFF_SECONDS:
+                log.warning(
+                    f"GitHub {resp.status_code} on {url} — throttle needs {delay:.0f}s "
+                    f"more than this call can wait; giving up"
+                )
+                return resp
             log.warning(
                 f"GitHub {resp.status_code} on {url} — backing off {delay:.0f}s "
                 f"(retry {attempt + 1}/{max_retries})"
             )
             await asyncio.sleep(delay)
+            slept += delay
             resp = await self._client.get(url, params=params, headers=headers)
         return resp
 
@@ -94,7 +105,11 @@ class GitHubClient:
             return True
         if resp.status_code in (403, 429):
             # Secondary limit sends Retry-After; primary limit zeroes Remaining.
-            if resp.headers.get("Retry-After"):
+            retry_after = resp.headers.get("Retry-After", "")
+            if retry_after.isdigit():
+                # Retrying before the window lifts just burns the attempt.
+                return float(retry_after) <= MAX_BACKOFF_SECONDS
+            if retry_after:
                 return True
             if resp.headers.get("X-RateLimit-Remaining") == "0":
                 return True
