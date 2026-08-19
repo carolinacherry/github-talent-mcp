@@ -96,7 +96,7 @@ Then set the token as an environment variable. Either:
 - Export it in your shell: `export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`
 - Or keep it in the `.env` file — the server reads it via `python-dotenv` on startup
 
-Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 9 tools under `github-talent`.
+Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 10 tools under `github-talent`.
 
 #### Claude Desktop
 
@@ -143,7 +143,7 @@ Add it to `~/.copilot/mcp-config.json` (global), or commit a `.copilot/mcp-confi
 
 Export your token first (`export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`) — Copilot only inherits `PATH`, so the `${GITHUB_TOKEN}` reference reads it from your shell. If `uvx` isn't on your `PATH`, use its absolute path as `command`.
 
-The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 9 tools under `github-talent`.
+The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 10 tools under `github-talent`.
 
 ## Try It
 
@@ -194,6 +194,7 @@ Want a fast, repeatable run instead? Give it everything up front — *"Rank thes
 | `bulk_score` | Score up to 100 GitHub usernames in one call. Returns a ranked markdown table or CSV. Supports optional JD matching. |
 | `generate_outreach` | Generate personalized recruiter messages (short/medium/detailed) that reference the candidate's actual repos and contributions. Requires your company name and sender name. Casual or formal tone. |
 | `get_repo_contributors` | Top contributors for any repo. Accepts `owner/repo` or full URL. The fastest way to source for a specific domain. |
+| `render_candidate_dashboard` | Build an interactive HTML shortlist — search, skill filters, ranking, evidence, and profile links — from a previous scoring result. Offered automatically after a search; only runs if you say yes. |
 
 ## Scoring
 

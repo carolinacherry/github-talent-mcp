@@ -7,6 +7,7 @@ import sys
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
+from github_talent_mcp import dashboard
 from github_talent_mcp.github_client import GitHubClient
 from github_talent_mcp.tools.search import search_developers as _search
 from github_talent_mcp.tools.profile import get_developer_profile as _profile
@@ -126,6 +127,10 @@ async def rank_candidates(
     remote/timezone, and any hard dealbreakers. If the request is missing these,
     ask concise follow-up questions FIRST, then call this tool.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Only
+    call render_candidate_dashboard if they say yes.
+
     Args:
         usernames: GitHub usernames to evaluate
         job_description: The role description to rank candidates against
@@ -159,6 +164,10 @@ async def score_against_jd(
     remote/timezone, and any hard dealbreakers. Ask concise follow-up questions
     FIRST if any are missing, then call this tool.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Only
+    call render_candidate_dashboard if they say yes.
+
     Args:
         job_description: Full job description text
         usernames: GitHub usernames to evaluate
@@ -183,6 +192,10 @@ async def compare_candidates(
     If a job description is provided, also scores each candidate against it
     and picks winners per dimension.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Only
+    call render_candidate_dashboard if they say yes.
+
     Args:
         usernames: 2-5 GitHub usernames to compare
         job_description: Optional job description for JD-aware comparison
@@ -205,6 +218,10 @@ async def bulk_score(
 
     Enriches each profile and ranks by activity score (or JD fit if a job
     description is provided). Returns a markdown table or CSV.
+
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Only
+    call render_candidate_dashboard if they say yes.
 
     Args:
         usernames: List of GitHub usernames (max 100)
@@ -268,6 +285,44 @@ async def get_repo_contributors(
         limit: Max contributors to return (default 25)
     """
     return await _contributors(_get_client(), repo=repo, limit=limit)
+
+
+@mcp.tool()
+async def render_candidate_dashboard(
+    result_id: str,
+    title: str = "Candidate shortlist",
+    subtitle: str = "",
+    include_avatars: bool = True,
+    open_in_browser: bool = False,
+) -> str:
+    """Build an interactive HTML candidate dashboard from a previous search result.
+
+    Only call this after the user has explicitly said yes to the dashboard offer in
+    a next_action block. Pass the result_id from that block — the server still holds
+    the scored data, so do not re-send candidate details and do not write your own
+    HTML. The page is fully self-contained (no network requests) and is written to a
+    local file; open the returned path for the user.
+
+    Args:
+        result_id: The result_id from a next_action block on an earlier tool result
+        title: Heading for the dashboard, e.g. "Staff Design Engineer candidates"
+        subtitle: One-line description of the search, shown under the heading
+        include_avatars: Show GitHub avatars (the page then loads them from avatars.githubusercontent.com)
+        open_in_browser: Launch the user's default browser on the finished page. Leave
+            false if your app can display the HTML inline; the page has its own
+            "Open in browser" link either way.
+    """
+    import json as _json
+    return _json.dumps(
+        dashboard.build(
+            result_id,
+            title=title,
+            subtitle=subtitle,
+            include_avatars=include_avatars,
+            open_in_browser=open_in_browser,
+        ),
+        indent=2,
+    )
 
 
 def main():

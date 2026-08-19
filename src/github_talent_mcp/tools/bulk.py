@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.scoring import score_jd_dimensions, generate_strengths_gaps
 from github_talent_mcp.tools.profile import enrich_profiles
 
@@ -72,14 +73,16 @@ async def bulk_score(
     else:
         output = _to_markdown(rows, has_jd=bool(job_description))
 
-    return json.dumps({
+    payload = {
         "format": export_format,
         "total_scored": len(rows),
         "total_errors": len(errors),
         "estimated_api_calls": estimated_calls,
         "errors": errors[:5],
         "table": output,
-    }, indent=2)
+    }
+    _attach_offer(payload, "bulk", rows, profiles, cache_payload={"rows": rows})
+    return json.dumps(payload, indent=2)
 
 
 def _to_markdown(rows: list[dict], *, has_jd: bool) -> str:

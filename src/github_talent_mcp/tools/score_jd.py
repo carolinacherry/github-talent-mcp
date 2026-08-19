@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.scoring import score_jd_dimensions, generate_strengths_gaps
 from github_talent_mcp.tools.profile import enrich_profiles
 
@@ -57,8 +58,10 @@ async def score_against_jd(
     for i, r in enumerate(results[:top_n], 1):
         r["rank"] = i
 
-    return json.dumps({
+    payload = {
         "job_description_summary": job_description[:200],
         "total_evaluated": len(results),
         "candidates": results[:top_n],
-    }, indent=2)
+    }
+    _attach_offer(payload, "score_jd", payload["candidates"], profiles)
+    return json.dumps(payload, indent=2)

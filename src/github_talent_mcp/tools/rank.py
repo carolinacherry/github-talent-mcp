@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.scoring import (
     compute_relevance_score,
     extract_keywords,
@@ -84,8 +85,10 @@ async def rank_candidates(
     for i, c in enumerate(candidates[:top_n], 1):
         c["rank"] = i
 
-    return json.dumps({
+    payload = {
         "job_keywords_extracted": keywords[:20],
         "total_evaluated": len(candidates),
         "candidates": candidates[:top_n],
-    }, indent=2)
+    }
+    _attach_offer(payload, "rank", payload["candidates"], profiles)
+    return json.dumps(payload, indent=2)

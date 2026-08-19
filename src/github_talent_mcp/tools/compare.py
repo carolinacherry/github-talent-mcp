@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.scoring import score_jd_dimensions, generate_strengths_gaps
 from github_talent_mcp.tools.profile import enrich_profiles
 
@@ -92,8 +93,10 @@ async def compare_candidates(
             else:
                 recommendation = f"{top['username']} and {runner['username']} are very close ({top['jd_overall_fit']} vs {runner['jd_overall_fit']}). Interview both."
 
-    return json.dumps({
+    payload = {
         "candidates": candidates,
         "winners": winners,
         "recommendation": recommendation,
-    }, indent=2)
+    }
+    _attach_offer(payload, "compare", candidates, profiles)
+    return json.dumps(payload, indent=2)

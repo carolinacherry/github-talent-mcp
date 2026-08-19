@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "github-talent-mcp"
-version = "0.4.1"
+version = "0.5.0"
 description = "MCP server for searching, scoring, and ranking GitHub developers for technical recruiting"
 readme = "README.md"
 license = "Apache-2.0"
