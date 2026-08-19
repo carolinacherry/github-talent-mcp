@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
-from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.scoring import (
     compute_relevance_score,
     extract_keywords,
     generate_strengths_gaps,
 )
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.tools.profile import enrich_profiles
 
 
@@ -73,10 +73,15 @@ async def rank_candidates(
         candidates.append({
             "rank": 0,
             "username": username,
+            "name": profile.get("name") or username,
             "score": round(combined, 1),
             "reasoning": reasoning,
             "strengths": strengths,
             "gaps": gaps,
+            "top_languages": profile.get("top_languages", [])[:5],
+            "location": profile.get("location"),
+            "company": profile.get("company"),
+            "avatar_url": profile.get("avatar_url"),
             "profile_url": profile.get("html_url", f"https://github.com/{username}"),
         })
 

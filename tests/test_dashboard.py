@@ -262,3 +262,24 @@ def test_instruction_tells_the_host_to_end_its_reply_with_the_question():
     offer = dashboard.next_action("rank-0001", 3)
     assert "final line" in offer["instruction"]
     assert "even" in offer["instruction"]
+
+
+def test_scoring_output_exposes_what_a_dashboard_needs():
+    """Whoever builds the page — the server or the host model — needs these."""
+    import asyncio
+    from unittest.mock import patch
+
+    from github_talent_mcp.tools import rank as rank_mod
+
+    profile = _profile()
+    async def _fake(_client, usernames):
+        return {"octocat": profile}
+
+    with patch.object(rank_mod, "enrich_profiles", _fake):
+        out = asyncio.run(rank_mod.rank_candidates(
+            None, usernames=["octocat"], job_description="Python engineer"))
+
+    candidate = json.loads(out)["candidates"][0]
+    for field in ("name", "avatar_url", "location", "company", "top_languages", "profile_url"):
+        assert candidate.get(field), f"{field} missing from rank_candidates output"
+    assert "avatars.githubusercontent.com" in candidate["avatar_url"]
