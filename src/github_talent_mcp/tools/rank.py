@@ -8,6 +8,7 @@ from github_talent_mcp.scoring import (
     extract_keywords,
     generate_strengths_gaps,
 )
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.tools.profile import enrich_profiles
 
 
@@ -30,6 +31,7 @@ async def rank_candidates(
                 "rank": 0,
                 "username": username,
                 "score": 0,
+                "error": profile["error"],
                 "reasoning": f"Could not fetch profile: {profile['error']}",
                 "strengths": [],
                 "gaps": ["Profile unavailable"],
@@ -72,10 +74,15 @@ async def rank_candidates(
         candidates.append({
             "rank": 0,
             "username": username,
+            "name": profile.get("name") or username,
             "score": round(combined, 1),
             "reasoning": reasoning,
             "strengths": strengths,
             "gaps": gaps,
+            "top_languages": profile.get("top_languages", [])[:5],
+            "location": profile.get("location"),
+            "company": profile.get("company"),
+            "avatar_url": profile.get("avatar_url"),
             "profile_url": profile.get("html_url", f"https://github.com/{username}"),
         })
 
@@ -84,8 +91,10 @@ async def rank_candidates(
     for i, c in enumerate(candidates[:top_n], 1):
         c["rank"] = i
 
-    return json.dumps({
+    payload = {
         "job_keywords_extracted": keywords[:20],
         "total_evaluated": len(candidates),
         "candidates": candidates[:top_n],
-    }, indent=2)
+    }
+    payload = _attach_offer(payload, payload["candidates"])
+    return json.dumps(payload, indent=2)

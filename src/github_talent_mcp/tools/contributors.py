@@ -4,6 +4,7 @@ import json
 from urllib.parse import urlparse
 
 from github_talent_mcp.github_client import GitHubClient
+from github_talent_mcp.tools._offer import _attach_offer
 
 
 def parse_repo_string(repo: str) -> tuple[str, str]:
@@ -54,8 +55,9 @@ async def get_repo_contributors(
             "avatar_url": c.get("avatar_url", ""),
         })
 
-    return json.dumps({
+    payload = {
         "repo": f"{owner}/{repo_name}",
         "total_returned": len(contributors),
         "contributors": contributors,
-    }, indent=2)
+    }
+    return json.dumps(_attach_offer(payload, contributors, conditional=True), indent=2)

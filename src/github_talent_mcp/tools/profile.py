@@ -138,19 +138,30 @@ async def _build_profile(client: GitHubClient, username: str) -> str:
             if repo_name and not repo_name.lower().startswith(f"{username.lower()}/"):
                 oss_contributions.add(repo_name)
 
-    # 7b. Fall back to Search API if Events API missed commits/PRs
+    # 7b. Fall back to Search API if Events API missed commits/PRs.
+    # The /search/* endpoints have a far lower rate limit than the rest of the API,
+    # so they 403 long before anything else does. That must not throw away a profile
+    # whose user, repo, language and star data all fetched successfully — it only
+    # costs us an activity count.
+    async def _search_count(coro_factory, days: int) -> int:
+        since = (now - timedelta(days=days)).strftime("%Y-%m-%d")
+        try:
+            return await coro_factory(username, since)
+        except Exception as e:
+            logging.getLogger("github-talent-mcp").warning(
+                "Search API unavailable for %s (%dd) — activity may be understated: %s",
+                username, days, e,
+            )
+            return 0
+
     if commits_90d == 0:
-        since_90d = (now - timedelta(days=90)).strftime("%Y-%m-%d")
-        commits_90d = await client.search_commit_count(username, since_90d)
+        commits_90d = await _search_count(client.search_commit_count, 90)
     if commits_30d == 0:
-        since_30d = (now - timedelta(days=30)).strftime("%Y-%m-%d")
-        commits_30d = await client.search_commit_count(username, since_30d)
+        commits_30d = await _search_count(client.search_commit_count, 30)
     if prs_opened_90d == 0:
-        since_90d = (now - timedelta(days=90)).strftime("%Y-%m-%d")
-        prs_opened_90d = await client.search_pr_count(username, since_90d)
+        prs_opened_90d = await _search_count(client.search_pr_count, 90)
     if prs_opened_30d == 0:
-        since_30d = (now - timedelta(days=30)).strftime("%Y-%m-%d")
-        prs_opened_30d = await client.search_pr_count(username, since_30d)
+        prs_opened_30d = await _search_count(client.search_pr_count, 30)
 
     # 7c. Fetch star counts for contributed repos (captures org repo impact)
     contributed_stars = 0

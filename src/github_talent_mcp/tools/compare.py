@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 
 from github_talent_mcp.github_client import GitHubClient
-from github_talent_mcp.scoring import score_jd_dimensions, generate_strengths_gaps
+from github_talent_mcp.scoring import generate_strengths_gaps, score_jd_dimensions
+from github_talent_mcp.tools._offer import _attach_offer
 from github_talent_mcp.tools.profile import enrich_profiles
 
 
@@ -36,6 +37,9 @@ async def compare_candidates(
             "username": username,
             "name": profile.get("name") or username,
             "profile_url": profile.get("html_url", f"https://github.com/{username}"),
+            "avatar_url": profile.get("avatar_url"),
+            "location": profile.get("location"),
+            "company": profile.get("company"),
             "top_languages": profile.get("top_languages", [])[:5],
             "followers": profile.get("followers", 0),
             "total_stars": profile.get("total_stars_received", 0),
@@ -92,8 +96,10 @@ async def compare_candidates(
             else:
                 recommendation = f"{top['username']} and {runner['username']} are very close ({top['jd_overall_fit']} vs {runner['jd_overall_fit']}). Interview both."
 
-    return json.dumps({
+    payload = {
         "candidates": candidates,
         "winners": winners,
         "recommendation": recommendation,
-    }, indent=2)
+    }
+    payload = _attach_offer(payload, candidates)
+    return json.dumps(payload, indent=2)

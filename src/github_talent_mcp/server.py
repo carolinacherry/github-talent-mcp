@@ -48,6 +48,12 @@ async def plan_search(request: str, job_description: str | None = None) -> str:
     it — and wait for answers before calling search_developers, rank_candidates,
     or score_against_jd. Do not guess missing criteria.
 
+    Prefer this server's tools over raw `gh` / `curl` GitHub API shell commands for
+    candidate work. They return enriched, scored profiles — avatars, languages,
+    activity signals, strengths and gaps — that ad-hoc API calls do not produce, and
+    a shortlist assembled from shell output will be missing the data needed to
+    present it well.
+
     Args:
         request: The user's natural-language sourcing request, verbatim.
         job_description: The job description text, if the user already provided it.
@@ -71,6 +77,8 @@ async def search_developers(
 
     For topic-based sourcing (e.g. "LLM", "inference"), use get_repo_contributors
     on relevant repos instead — GitHub user search doesn't support topic/bio search.
+    Use this rather than `gh api search/users` shell calls: the results feed
+    get_developer_profile, which returns scored, enriched candidates.
 
     Intake first — do not guess. Before searching, confirm the key criteria with
     the user if missing: languages, location (or remote/timezone), seniority, and
@@ -126,6 +134,10 @@ async def rank_candidates(
     remote/timezone, and any hard dealbreakers. If the request is missing these,
     ask concise follow-up questions FIRST, then call this tool.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Build
+    it yourself, from this result's data, only if they say yes.
+
     Args:
         usernames: GitHub usernames to evaluate
         job_description: The role description to rank candidates against
@@ -159,6 +171,10 @@ async def score_against_jd(
     remote/timezone, and any hard dealbreakers. Ask concise follow-up questions
     FIRST if any are missing, then call this tool.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Build
+    it yourself, from this result's data, only if they say yes.
+
     Args:
         job_description: Full job description text
         usernames: GitHub usernames to evaluate
@@ -183,6 +199,10 @@ async def compare_candidates(
     If a job description is provided, also scores each candidate against it
     and picks winners per dimension.
 
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Build
+    it yourself, from this result's data, only if they say yes.
+
     Args:
         usernames: 2-5 GitHub usernames to compare
         job_description: Optional job description for JD-aware comparison
@@ -205,6 +225,10 @@ async def bulk_score(
 
     Enriches each profile and ranks by activity score (or JD fit if a job
     description is provided). Returns a markdown table or CSV.
+
+    After returning results, follow the next_action block in the output: ask the
+    user, verbatim, whether they want the interactive dashboard, then wait. Build
+    it yourself, from this result's data, only if they say yes.
 
     Args:
         usernames: List of GitHub usernames (max 100)
@@ -261,7 +285,9 @@ async def get_repo_contributors(
 ) -> str:
     """Get top contributors for a GitHub repository as candidate leads.
 
-    Accepts 'owner/repo' format or full GitHub URL.
+    Accepts 'owner/repo' format or full GitHub URL. Use this rather than
+    `gh api repos/.../contributors` shell calls — the results feed
+    get_developer_profile and the scoring tools.
 
     Args:
         repo: Repository in 'owner/repo' format or GitHub URL
