@@ -82,3 +82,15 @@ def test_scoring_tools_keep_the_unconditional_offer():
     entries = _candidates()
     instruction = _attach_offer({"candidates": entries}, entries)["next_action"]["instruction"]
     assert instruction.startswith("REQUIRED:")
+
+
+def test_instruction_routes_around_the_sandboxed_canvas():
+    """Copilot's canvas silently blocks target=_blank, so a dashboard shown only there
+    has dead GitHub links. A button inside the page hits the same block — the model
+    has to open the file with a shell command instead."""
+    instruction = _attach_offer({"c": 1}, _candidates())["next_action"]["instruction"]
+    assert "blocks its outbound links" in instruction
+    assert "open the saved HTML file in the user's default browser" in instruction
+    for cmd in ("open", "xdg-open", "start"):
+        assert cmd in instruction
+    assert "tell them the file path" in instruction

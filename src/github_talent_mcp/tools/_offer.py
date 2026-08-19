@@ -29,7 +29,12 @@ INSTRUCTION = (
     "candidates and skills, skill filters, the ranking, the evidence bullets, and a "
     "link to each profile_url. Do not state anything about a candidate that is not in "
     "this result. Skip the question only if the user already declined a dashboard "
-    "earlier in this conversation."
+    "earlier in this conversation.\n"
+    "Finally: an inline canvas or preview pane usually sandboxes the page and silently "
+    "blocks its outbound links, so a shortlist rendered only there has dead profile "
+    "links. After displaying it, also open the saved HTML file in the user's default "
+    "browser with a shell command (`open` on macOS, `xdg-open` on Linux, `start` on "
+    "Windows) and tell them the file path, so the GitHub links are actually clickable."
 )
 
 
