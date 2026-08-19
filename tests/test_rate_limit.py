@@ -91,3 +91,47 @@ async def test_gives_up_after_max_retries(no_sleep):
     resp = await client._get("/x", max_retries=3)
     assert resp.status_code == 403
     assert client._client.get.await_count == 4  # initial + 3 retries
+
+
+@pytest.mark.asyncio
+async def test_waits_the_full_retry_after_not_a_shorter_cap(no_sleep):
+    """GitHub's "retry after 23s" was being served with an 8s wait, so the retry
+    landed inside the throttle window and failed — three attempts, no data."""
+    client = _client_with([
+        _resp(403, {"Retry-After": "23"}),
+        _resp(200),
+    ])
+    resp = await client._get("https://api.github.com/search/users")
+
+    assert resp.status_code == 200
+    assert no_sleep, "no backoff happened at all"
+    assert no_sleep[0] == pytest.approx(23.0), (
+        f"slept {no_sleep[0]}s when GitHub asked for 23s"
+    )
+
+
+@pytest.mark.asyncio
+async def test_gives_up_rather_than_retrying_before_the_window_lifts(no_sleep):
+    """A throttle longer than we can wait: retrying early is strictly worse than
+    returning the error, since it burns the attempt and still fails."""
+    client = _client_with([
+        _resp(403, {"Retry-After": "600"}),
+        _resp(200),
+    ])
+    resp = await client._get("https://api.github.com/search/users")
+
+    assert resp.status_code == 403, "retried into a throttle it could not outlast"
+    assert not no_sleep, "slept before giving up"
+
+
+@pytest.mark.asyncio
+async def test_total_backoff_is_bounded_across_retries(no_sleep):
+    """Two long-ish waits must not stack past an MCP client's request timeout."""
+    client = _client_with([
+        _resp(403, {"Retry-After": "25"}),
+        _resp(403, {"Retry-After": "25"}),
+        _resp(200),
+    ])
+    await client._get("https://api.github.com/search/users")
+
+    assert sum(no_sleep) <= 35.0, f"slept {sum(no_sleep)}s in one call"
