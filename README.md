@@ -1,7 +1,7 @@
 # github-talent-mcp
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Python 3.14+](https://img.shields.io/badge/Python-3.14+-blue.svg)](https://www.python.org)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org)
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
@@ -264,9 +264,35 @@ The final score is `max(behavioral_score, reputation_floor)`. If the floor is ap
 
 `rank_candidates` combines the activity score with a **relevance score** (0-100) based on keyword overlap between the job description and the candidate's profile (bio, languages, repo topics, README). The combined score weights relevance at 60% and activity at 40% — a high-activity developer with no overlap to the job shouldn't outrank a relevant one.
 
+## Interactive dashboard
+
+After a search produces a shortlist, the server asks whether you want an interactive
+dashboard — search, skill filters, ranking, evidence, and GitHub profile links. Answer yes
+and your assistant builds it with its own artifact tooling (Copilot's canvas, Claude's
+artifacts) from the scored candidate data.
+
+It only ever offers; nothing is built unless you say yes, and the offer is skipped when a
+search produced no usable profiles. Set `GITHUB_TALENT_DASHBOARD_PROMPT=0` to turn it off.
+
+If the page opens in an inline canvas, note that those panes sandbox their content and
+block outbound links, so the assistant is also asked to open the saved file in your browser
+where the GitHub links work.
+
 ## Rate Limits
 
-GitHub REST API: 5,000 requests/hour with token. A typical workflow (search + enrich 5 candidates + rank) uses ~60-100 API calls. Profile results are cached within a session to avoid redundant calls during ranking.
+GitHub REST API: **5,000 requests/hour with a token, 60 without one.** A single enriched
+profile costs 6-15 calls and a typical workflow (search + enrich 5 candidates + rank) uses
+~60-100, so an unauthenticated server runs out inside one search. Profile results are cached
+within a session to avoid redundant calls during ranking.
+
+Two limits are separate from that hourly budget and worth knowing:
+
+- **Search endpoints** (`/search/commits`, `/search/issues`) allow only 30 requests/minute
+  even with a token. The server treats a failure there as an unknown activity count rather
+  than a failed profile, so a shortlist still comes back — the commit counts may just read 0.
+- **Secondary rate limits** fire on bursts of concurrent requests and return an explicit
+  `Retry-After`. The server waits exactly that long, up to 30 seconds, then gives up rather
+  than retrying into a window that has not lifted.
 
 ## Limitations & responsible use
 
