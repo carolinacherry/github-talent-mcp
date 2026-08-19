@@ -283,3 +283,35 @@ def test_scoring_output_exposes_what_a_dashboard_needs():
     for field in ("name", "avatar_url", "location", "company", "top_languages", "profile_url"):
         assert candidate.get(field), f"{field} missing from rank_candidates output"
     assert "avatars.githubusercontent.com" in candidate["avatar_url"]
+
+
+def test_no_offer_when_every_profile_failed_to_load():
+    """The bug behind the empty dashboard: rank/score_jd failure rows carried no
+    'error' key, so five unusable candidates looked scoreable and got rendered."""
+    from github_talent_mcp.tools._offer import _attach_offer
+
+    for source, payload in [
+        ("rank", {"candidates": [
+            {"rank": 0, "username": u, "score": 0, "error": "429 rate limited",
+             "reasoning": "Could not fetch profile: 429 rate limited",
+             "strengths": [], "gaps": ["Profile unavailable"]}
+            for u in ("afourney", "victordibia", "rysweet")]}),
+        ("score_jd", {"candidates": [
+            {"rank": 0, "username": u, "overall_fit": 0, "error": "403 Forbidden",
+             "strengths": [], "gaps": ["Profile unavailable"]}
+            for u in ("westonpace", "eddyxu")]}),
+    ]:
+        result = _attach_offer(payload, source, payload["candidates"], {})
+        assert "next_action" not in result, f"{source} offered a dashboard of empty rows"
+
+
+def test_partial_failure_renders_only_the_usable_candidates():
+    payload = {"candidates": [
+        {"rank": 1, "username": "octocat", "score": 90, "strengths": ["Ships"], "gaps": []},
+        {"rank": 0, "username": "gone", "score": 0, "error": "404",
+         "gaps": ["Profile unavailable"], "strengths": []},
+    ]}
+    rid = dashboard.register_result("rank", payload, {"octocat": _profile()})
+    result = dashboard.build(rid)
+    assert result["candidate_count"] == 1
+    assert "Profile unavailable" not in _read(result["path"])

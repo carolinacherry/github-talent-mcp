@@ -26,6 +26,7 @@ async def score_against_jd(
             results.append({
                 "rank": 0,
                 "username": username,
+                "error": profile["error"],
                 "overall_fit": 0,
                 "dimensions": {},
                 "strengths": [],

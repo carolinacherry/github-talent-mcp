@@ -31,6 +31,7 @@ async def rank_candidates(
                 "rank": 0,
                 "username": username,
                 "score": 0,
+                "error": profile["error"],
                 "reasoning": f"Could not fetch profile: {profile['error']}",
                 "strengths": [],
                 "gaps": ["Profile unavailable"],
