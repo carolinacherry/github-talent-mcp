@@ -22,14 +22,22 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --python ${{ matrix.python }}
-      - run: uv run --python ${{ matrix.python }} pytest -q
+      # pytest is not a project dependency; supply it per-run rather than
+      # shipping test tooling in the published package.
+      - run: uv run --python ${{ matrix.python }} --with pytest --with pytest-asyncio pytest -q
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uvx ruff check src/github_talent_mcp/tools/_offer.py tests/
+      - run: |
+          uvx ruff check \
+            src/github_talent_mcp/tools/_offer.py \
+            tests/test_dashboard_offer.py \
+            tests/test_profile_resilience.py \
+            tests/test_rate_limit.py \
+            scripts/
 
   docs:
     name: README matches the code
