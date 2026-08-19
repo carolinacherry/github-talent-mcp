@@ -58,45 +58,78 @@ Combined score = activity × 0.4 + relevance × 0.6. Relevance is keyword overla
 
 ## Installation
 
-### 1. Clone and install
+### 1. Install `uv`
+
+The server runs through `uvx`, which downloads and launches it for you — no clone, no
+virtualenv, and you get updates automatically.
 
 ```bash
-git clone https://github.com/carolinacherry/github-talent-mcp.git
-cd github-talent-mcp
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e .
+brew install uv
 ```
+
+No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ### 2. Create a GitHub personal access token
 
-Go to [github.com/settings/tokens](https://github.com/settings/tokens) and create a **fine-grained** or **classic** token with these scopes:
+Without a token GitHub allows **60 requests per hour**, and a single candidate profile
+costs 6-15 of them. You will run out mid-search and profiles will come back empty. With a
+token you get 5,000/hour.
+
+Go to [github.com/settings/tokens](https://github.com/settings/tokens) and create a
+**fine-grained** or **classic** token with these scopes:
 
 | Scope | Why |
 |---|---|
 | `read:user` | Read user profiles and search users |
 | `public_repo` | Read public repo data, languages, contributors |
 
-Create a `.env` file in the project root:
+Copy the token — you cannot view it again after leaving the page.
 
-```
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-```
+### 3. Connect it
 
-### 3. Connect to Claude
+**Put the token itself in the config, not `${GITHUB_TOKEN}`.** Desktop apps are launched by
+the operating system, not by your shell, so they never read `.zshrc` and an environment
+variable reference expands to nothing. The server then starts fine, runs unauthenticated,
+and quietly fails a few candidates in. A `.env` file has the same problem unless the config
+also sets `cwd` to the project directory, because it is read relative to the working
+directory.
 
-#### Claude Code (CLI)
+#### GitHub Copilot (CLI and desktop app)
 
-One command:
+Both share one config. Paste this in a terminal — it fills in your token for you:
 
 ```bash
-claude mcp add github-talent -- /path/to/github-talent-mcp/.venv/bin/python3 -m github_talent_mcp
+mkdir -p ~/.copilot
+TOKEN=$(gh auth token)   # or: TOKEN=github_pat_xxxxxxxx
+cat > ~/.copilot/mcp-config.json <<EOF
+{
+  "mcpServers": {
+    "github-talent": {
+      "type": "local",
+      "command": "uvx",
+      "args": ["github-talent-mcp"],
+      "env": { "GITHUB_TOKEN": "$TOKEN" },
+      "tools": ["*"]
+    }
+  }
+}
+EOF
+chmod 600 ~/.copilot/mcp-config.json
 ```
 
-Then set the token as an environment variable. Either:
-- Export it in your shell: `export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`
-- Or keep it in the `.env` file — the server reads it via `python-dotenv` on startup
+Quit Copilot completely and reopen it, then run `/mcp show` — you should see 9 tools under
+`github-talent`. The app also accepts servers under Settings → MCP if you would rather not
+touch a file.
 
-Restart Claude Code to pick up the new server. Verify with `/mcp` — you should see 9 tools under `github-talent`.
+If `uvx` is not found, give its full path as `command` (`which uvx` prints it).
+
+#### Claude Code
+
+```bash
+claude mcp add github-talent --env GITHUB_TOKEN=github_pat_xxxxxxxx -- uvx github-talent-mcp
+```
+
+Restart Claude Code and verify with `/mcp`.
 
 #### Claude Desktop
 
@@ -106,44 +139,37 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "github-talent": {
-      "command": "/path/to/github-talent-mcp/.venv/bin/python3",
-      "args": ["-m", "github_talent_mcp"],
-      "cwd": "/path/to/github-talent-mcp",
+      "command": "uvx",
+      "args": ["github-talent-mcp"],
       "env": {
-        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxx"
+        "GITHUB_TOKEN": "github_pat_xxxxxxxx"
       }
     }
   }
 }
 ```
 
-Restart Claude Desktop. The tools will appear in the toolbox icon.
+Restart Claude Desktop.
 
-#### GitHub Copilot (CLI & desktop app)
+#### Checking it actually works
 
-The [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli) and the [GitHub Copilot app](https://github.com/features/ai/github-app) share one MCP config, so a single setup covers both.
+Run a search and look at the size of each `get_developer_profile` result. A real profile is
+120-170 lines. **Three lines means the call failed** — almost always a missing or
+unreadable token. Every tool returning three lines while the server still shows as
+connected is the signature of running unauthenticated.
 
-Add it to `~/.copilot/mcp-config.json` (global), or commit a `.copilot/mcp-config.json` in your repo — the Copilot app picks that up automatically:
+### Running from source
 
-```json
-{
-  "mcpServers": {
-    "github-talent": {
-      "type": "local",
-      "command": "uvx",
-      "args": ["github-talent-mcp"],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      },
-      "tools": ["*"]
-    }
-  }
-}
+Only needed if you want to modify the server:
+
+```bash
+git clone https://github.com/carolinacherry/github-talent-mcp.git
+cd github-talent-mcp
+uv sync
 ```
 
-Export your token first (`export GITHUB_TOKEN=ghp_xxxxxxxxxxxx`) — Copilot only inherits `PATH`, so the `${GITHUB_TOKEN}` reference reads it from your shell. If `uvx` isn't on your `PATH`, use its absolute path as `command`.
-
-The **Copilot app** reads this same config and also lets you add servers under Settings → MCP. In a Copilot CLI session, run `/mcp add` to register interactively or `/mcp show` to verify — you should see 9 tools under `github-talent`.
+Then use `uv run --directory /path/to/github-talent-mcp github-talent-mcp` as the command in
+any config above.
 
 ## Try It
 
