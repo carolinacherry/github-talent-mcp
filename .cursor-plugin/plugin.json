@@ -9,6 +9,7 @@
   "homepage": "https://github.com/carolinacherry/github-talent-mcp",
   "repository": "https://github.com/carolinacherry/github-talent-mcp",
   "license": "Apache-2.0",
+  "logo": "assets/logo/talent-mcp-icon-dark.svg",
   "keywords": [
     "recruiting",
     "github",
@@ -27,6 +28,8 @@
         "description": "Fine-grained token with read:user and public_repo scopes. Create at github.com/settings/tokens. Required for API rate limits (5,000/hr vs 60/hr unauthenticated)."
       }
     },
-    "required": ["GITHUB_TOKEN"]
+    "required": [
+      "GITHUB_TOKEN"
+    ]
   }
 }
