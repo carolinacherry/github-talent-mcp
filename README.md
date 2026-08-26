@@ -5,6 +5,8 @@
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
+[![Cursor](https://img.shields.io/badge/Works_with-Cursor-000000)](https://cursor.com)
+[![Grok Bot](https://img.shields.io/badge/Works_with-Grok_Bot-1C9A5F)](https://cursor.com)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
@@ -168,21 +170,34 @@ Restart Claude Desktop.
 
 #### Cursor IDE and Grok Bot
 
-Once listed on the marketplace, users install via **Plugins → Add** (the same Add button as Gmail and other plugins):
+**Note:** A marketplace application has been submitted and is currently in review.
 
-1. Install `uv` if not already installed (required on your machine):
+**After marketplace listing (one-click install):**
+
+1. Install `uv` if not already on your machine:
    ```bash
    brew install uv
    ```
    No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. In Cursor IDE or Grok Bot, go to **Plugins → Add → GitHub Talent Search**.
+2. In Cursor IDE or Grok Bot, go to **Plugins → Add** (the same Add button as Gmail), search for **GitHub Talent Search**, and install it.
 
 3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
 
-The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be available on your `PATH`.
+**Until marketplace approval (available now):**
 
-**Local testing (Cursor IDE only, pre-marketplace):** Copy or symlink this repository into `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**). Grok Bot does not support local plugin loading.
+Both Cursor IDE and Grok Bot can connect to the server today without waiting for marketplace approval.
+
+- **Cursor IDE:** Symlink this repository to `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**).
+  ```bash
+  mkdir -p ~/.cursor/plugins/local
+  ln -s /path/to/github-talent-mcp ~/.cursor/plugins/local/github-talent-mcp
+  ```
+
+- **Grok Bot:** Add the MCP server as a connector:
+  - **Command:** `uvx`
+  - **Args:** `["github-talent-mcp"]`
+  - **Environment:** `GITHUB_TOKEN=github_pat_xxxxxxxx`
 
 #### Checking it actually works
 
