@@ -198,8 +198,6 @@ Both Cursor IDE and Grok Bot can connect to the server today without waiting for
   - **Command:** `uvx`
   - **Args:** `["github-talent-mcp"]`
   - **Environment:** `GITHUB_TOKEN=github_pat_xxxxxxxx`
-  
-  This is the live setup running in production Grok Bot chats right now.
 
 #### Checking it actually works
 
