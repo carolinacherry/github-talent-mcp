@@ -5,8 +5,8 @@
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
-[![Cursor](https://img.shields.io/badge/Cursor-IDE_%26_Grok_Bot-00A4EF)](https://cursor.com)
-[![Grok Bot](https://img.shields.io/badge/Grok_Bot-Powered_by_Cursor-00A4EF)](https://cursor.com/grok)
+[![Cursor](https://img.shields.io/badge/Works_with-Cursor-000000)](https://cursor.com)
+[![Grok Bot](https://img.shields.io/badge/Works_with-Grok_Bot-1C9A5F)](https://cursor.com)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
