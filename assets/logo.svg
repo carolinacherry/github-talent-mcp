@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Talent MCP">
+  <rect width="512" height="512" rx="112" fill="#F3F2EE"/>
+  <g fill="none" stroke="#1A1916" stroke-width="18" stroke-linecap="round">
+    <line x1="168" y1="214" x2="344" y2="214"/>
+    <line x1="168" y1="214" x2="256" y2="334"/>
+    <line x1="344" y1="214" x2="256" y2="334"/>
+  </g>
+  <g fill="#1A1916">
+    <circle cx="168" cy="214" r="28"/>
+    <circle cx="344" cy="214" r="28"/>
+    <circle cx="256" cy="334" r="28"/>
+  </g>
+</svg>

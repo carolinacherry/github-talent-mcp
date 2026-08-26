@@ -7,6 +7,7 @@
   },
   "repository": "https://github.com/carolinacherry/github-talent-mcp",
   "license": "Apache-2.0",
+  "logo": "assets/logo.svg",
   "keywords": ["recruiting", "github", "developer-tools", "talent", "mcp", "sourcing", "hiring"],
   "mcpServers": {
     "github-talent": {
