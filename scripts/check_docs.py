@@ -64,7 +64,11 @@ check("no documented tool is missing from the server", documented <= set(tools) 
 # Manifests advertise a version users install from PyPI; a mismatch means someone
 # installs a build that doesn't have what the manifest promises.
 version = re.search(r'^version = "([^"]+)"', PYPROJECT, re.MULTILINE).group(1)
-for manifest in [".claude-plugin/plugin.json", ".claude-plugin/marketplace.json"]:
+for manifest in [
+    ".claude-plugin/plugin.json",
+    ".claude-plugin/marketplace.json",
+    ".cursor-plugin/plugin.json",
+]:
     data = json.loads((ROOT / manifest).read_text())
     declared_v = data.get("version") or data["plugins"][0]["version"]
     check(f"{manifest} version matches pyproject", declared_v == version, f"{declared_v} vs {version}")
@@ -75,6 +79,11 @@ check("search endpoint limit is documented", "30 requests/minute" in README)
 check("the 3-line failure signature is documented", "Three lines means the call failed" in README)
 check("the dashboard offer is documented", "Interactive dashboard" in README)
 check("the dashboard kill switch is documented", "GITHUB_TALENT_DASHBOARD_PROMPT=0" in README)
+check("Cloud Agent uvx ENOENT is documented", "spawn uvx ENOENT" in README)
+check("Cloud Agent MCP + menu is documented", "**+** button" in README and "MCP Servers" in README)
+check("Cloud Agents reject /home/box launcher is documented", "/home/box/bin/github-talent-mcp.sh" in README)
+check("Cloud Agent Python bypass is documented", "proof of MCP" in README)
+check("plugin ${GITHUB_TOKEN} vs PAT is documented", "plugin variable" in README)
 
 print()
 if failures:

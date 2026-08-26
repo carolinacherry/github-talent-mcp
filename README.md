@@ -168,11 +168,14 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 Restart Claude Desktop.
 
-#### Cursor IDE and Grok Bot
+#### Cursor IDE and Cloud Agents (Grok Bot)
 
 **Note:** A marketplace application has been submitted and is currently in review.
+`${GITHUB_TOKEN}` in this repo's `mcp.json` and `.cursor-plugin/plugin.json` is a
+**plugin variable** for that install path. Cloud Agents and a hand-written
+`mcp.json` do **not** expand it. Paste the PAT.
 
-**After marketplace listing (one-click install):**
+**After marketplace listing (Cursor IDE one-click):**
 
 1. Install `uv` if not already on your machine:
    ```bash
@@ -180,31 +183,74 @@ Restart Claude Desktop.
    ```
    No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. In Cursor IDE or Grok Bot, go to **Plugins → Add** (the same Add button as Gmail), search for **GitHub Talent Search**, and install it.
+2. In **Cursor IDE**, go to **Plugins → Add**, search for **GitHub Talent Search**,
+   and install it.
 
-3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
+3. When prompted, enter your GitHub personal access token (fine-grained with
+   `read:user` and `public_repo` scopes).
 
-**Until marketplace approval (available now):**
+**Until marketplace approval — Cursor IDE:**
 
-Both Cursor IDE and Grok Bot can connect to the server today without waiting for marketplace approval.
+Symlink this repository to `~/.cursor/plugins/local/github-talent-mcp/`, then
+reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**).
 
-- **Cursor IDE:** Symlink this repository to `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**).
-  ```bash
-  mkdir -p ~/.cursor/plugins/local
-  ln -s /path/to/github-talent-mcp ~/.cursor/plugins/local/github-talent-mcp
-  ```
+```bash
+mkdir -p ~/.cursor/plugins/local
+ln -s /path/to/github-talent-mcp ~/.cursor/plugins/local/github-talent-mcp
+```
 
-- **Grok Bot:** Add the MCP server as a connector:
-  - **Command:** `uvx`
-  - **Args:** `["github-talent-mcp"]`
-  - **Environment:** `GITHUB_TOKEN=github_pat_xxxxxxxx`
+Or add a user/project `mcp.json` (`~/.cursor/mcp.json` or `.cursor/mcp.json`)
+with command `uvx`, args `["github-talent-mcp"]`, and `GITHUB_TOKEN` set to the
+PAT itself. Desktop interpolation, if you use it, is `${env:GITHUB_TOKEN}` — not
+`${GITHUB_TOKEN}`. If spawn fails, set `command` to the full path from `which uvx`
+(often `/opt/homebrew/bin/uvx` on Apple Silicon Homebrew).
+
+**Until marketplace approval — Cloud Agents (cursor.com/agents):**
+
+There is **no MCP dropdown** on the agents home page (Environment, Secrets, and
+**Set Up Cloud Agents** are not this). The control is the **+** button to the
+left of the model picker.
+
+1. Put `uvx` on the Cloud Agent VM's default PATH. Stdio MCP spawn does not
+   read `.bashrc`. If `uvx` is only in `~/.local/bin`, the server fails with
+   **`spawn uvx ENOENT`** and loads **0 tools**. Add this to the environment
+   **Install** script, Save, then start a **new** agent:
+
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   sudo install -m 0755 "$HOME/.local/bin/uv" /usr/local/bin/uv
+   sudo install -m 0755 "$HOME/.local/bin/uvx" /usr/local/bin/uvx
+   ```
+
+2. On [cursor.com/agents](https://cursor.com/agents), click **+** → **MCP Servers**.
+   Edit `github-talent` if it is already listed; otherwise **Add MCP**.
+
+3. In **Edit MCP server**:
+   - **Name:** `github-talent`
+   - **Type:** **Command** (not URL). This server is stdio, not HTTP. Cloud Agents
+     do not support SSE.
+   - **Command:** `uvx`
+   - **Arguments:** `github-talent-mcp` (leave extra empty Argument rows blank)
+   - **Secrets:** Key `GITHUB_TOKEN`, Value your PAT (`ghp_` or `github_pat_`).
+     Paste the token. An Environment-panel secret named `GITHUB_TOKEN` does
+     **not** copy into MCP env.
+   - Do **not** set Command to `/home/box/bin/github-talent-mcp.sh`. That path is
+     not on Cloud Agent VMs; the namespace attaches and still loads 0 tools.
+
+4. Save. Toggle `github-talent` on. Start a **new** Cloud Agent — existing runs
+   keep the old launcher. You should see 9 tools under `github-talent`.
 
 #### Checking it actually works
 
-Run a search and look at the size of each `get_developer_profile` result. A real profile is
-120-170 lines. **Three lines means the call failed** — almost always a missing or
-unreadable token. Every tool returning three lines while the server still shows as
-connected is the signature of running unauthenticated.
+Call **`get_developer_profile`** (the MCP tool, not `python` / `gh` / `curl`). A
+real profile is 120-170 lines. **Three lines means the call failed** — almost
+always a missing or unreadable token. Every tool returning three lines while the
+server still shows as connected is the signature of running unauthenticated.
+
+A formatted Torvalds table is **not** proof of MCP. Cloud Agents can import
+`github_talent_mcp` from this repo and print the same ~149-line profile while
+MCP discovery is still failing (`spawn uvx ENOENT`). Confirm the 9 tools loaded
+and that the call went through the MCP tool.
 
 ### Running from source
 
