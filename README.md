@@ -13,6 +13,19 @@ MCP server that searches, scores, and ranks GitHub developers for technical recr
 
 Works with **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
 
+## Brand
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg" width="96" alt="talent-mcp mark" />
+</p>
+
+<p align="center">
+  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg">Download (dark, default)</a> ·
+  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-light.svg">Download (light)</a> ·
+  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-mark-black.svg">mark only (black)</a> ·
+  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-mark-white.svg">mark only (white)</a>
+</p>
+
 ## Demo
 
 https://github.com/user-attachments/assets/b2dbe9e0-26ee-4849-861a-4b5cb268facc
