@@ -9,7 +9,7 @@
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
-Works with **Claude** (Code & Desktop) and **GitHub Copilot** (CLI & desktop app) — any MCP client that speaks stdio.
+Works with **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
 
 ## Demo
 
@@ -150,6 +150,24 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```
 
 Restart Claude Desktop.
+
+#### Cursor IDE and Grok Bot
+
+Once listed on the marketplace, users can install via **Plugins → Add** (the same Add button as Gmail and other plugins). Until then, for local testing:
+
+1. Install `uv` if not already installed (required on your machine):
+   ```bash
+   brew install uv
+   ```
+   No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+2. In Cursor, go to **Settings → Plugins → Add Plugin** and add this repository.
+
+3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
+
+The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be available on your `PATH`.
+
+After marketplace listing, installation is one-click: **Plugins → Add → GitHub Talent Search** → enter your token when prompted.
 
 #### Checking it actually works
 
