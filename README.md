@@ -87,14 +87,14 @@ Copy the token — you cannot view it again after leaving the page.
 
 ### 3. Connect it
 
-**Put the token itself in the config, not `${GITHUB_TOKEN}`.** Desktop apps are launched by
+#### GitHub Copilot (CLI and desktop app)
+
+**Important:** Put the token itself in the config, not `${GITHUB_TOKEN}`. Desktop apps are launched by
 the operating system, not by your shell, so they never read `.zshrc` and an environment
 variable reference expands to nothing. The server then starts fine, runs unauthenticated,
 and quietly fails a few candidates in. A `.env` file has the same problem unless the config
 also sets `cwd` to the project directory, because it is read relative to the working
 directory.
-
-#### GitHub Copilot (CLI and desktop app)
 
 Both share one config. Paste this in a terminal — it fills in your token for you:
 
@@ -133,6 +133,8 @@ Restart Claude Code and verify with `/mcp`.
 
 #### Claude Desktop
 
+**Important:** Same token-in-config rule as Copilot applies here.
+
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
@@ -153,7 +155,7 @@ Restart Claude Desktop.
 
 #### Cursor IDE and Grok Bot
 
-Once listed on the marketplace, users can install via **Plugins → Add** (the same Add button as Gmail and other plugins). Until then, for local testing:
+Once listed on the marketplace, users install via **Plugins → Add** (the same Add button as Gmail and other plugins):
 
 1. Install `uv` if not already installed (required on your machine):
    ```bash
@@ -161,13 +163,13 @@ Once listed on the marketplace, users can install via **Plugins → Add** (the s
    ```
    No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. In Cursor, go to **Settings → Plugins → Add Plugin** and add this repository.
+2. In Cursor IDE or Grok Bot, go to **Plugins → Add → GitHub Talent Search**.
 
 3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
 
 The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be available on your `PATH`.
 
-After marketplace listing, installation is one-click: **Plugins → Add → GitHub Talent Search** → enter your token when prompted.
+**Local testing (Cursor IDE only, pre-marketplace):** Copy or symlink this repository into `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**). Grok Bot does not support local plugin loading.
 
 #### Checking it actually works
 
