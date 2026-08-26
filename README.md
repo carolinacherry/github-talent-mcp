@@ -5,24 +5,13 @@
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
+[![Cursor](https://img.shields.io/badge/Cursor-IDE_%26_Grok_Bot-00A4EF)](https://cursor.com)
+[![Grok Bot](https://img.shields.io/badge/Grok_Bot-Powered_by_Cursor-00A4EF)](https://cursor.com/grok)
 [![GitHub API](https://img.shields.io/badge/GitHub-REST_API_v3-181717?logo=github)](https://docs.github.com/en/rest)
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
 Works with **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
-
-## Brand
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg" width="96" alt="talent-mcp mark" />
-</p>
-
-<p align="center">
-  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg">Download (dark, default)</a> ·
-  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-light.svg">Download (light)</a> ·
-  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-mark-black.svg">mark only (black)</a> ·
-  <a href="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-mark-white.svg">mark only (white)</a>
-</p>
 
 ## Demo
 
@@ -168,7 +157,9 @@ Restart Claude Desktop.
 
 #### Cursor IDE and Grok Bot
 
-Once listed on the marketplace, users install via **Plugins → Add** (the same Add button as Gmail and other plugins):
+**Note:** A marketplace application has been submitted and is currently in review. Installation instructions will be updated once the plugin is listed.
+
+**After marketplace listing:**
 
 1. Install `uv` if not already installed (required on your machine):
    ```bash
@@ -176,13 +167,23 @@ Once listed on the marketplace, users install via **Plugins → Add** (the same 
    ```
    No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. In Cursor IDE or Grok Bot, go to **Plugins → Add → GitHub Talent Search**.
+2. In Cursor IDE or Grok Bot, go to **Plugins → Add** (the same Add button as Gmail).
 
-3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
+3. Search for **GitHub Talent Search** and install it.
+
+4. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
 
 The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be available on your `PATH`.
 
-**Local testing (Cursor IDE only, pre-marketplace):** Copy or symlink this repository into `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**). Grok Bot does not support local plugin loading.
+**Local testing (pre-marketplace):**
+
+- **Cursor IDE:** Symlink this repository to `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**).
+  ```bash
+  mkdir -p ~/.cursor/plugins/local
+  ln -s /path/to/github-talent-mcp ~/.cursor/plugins/local/github-talent-mcp
+  ```
+
+- **Grok Bot:** Connect the `github-talent` MCP server using the standard MCP connector with `uvx github-talent-mcp` and set your `GITHUB_TOKEN` environment variable.
 
 #### Checking it actually works
 
