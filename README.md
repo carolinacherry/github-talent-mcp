@@ -157,25 +157,23 @@ Restart Claude Desktop.
 
 #### Cursor IDE and Grok Bot
 
-**Note:** A marketplace application has been submitted and is currently in review. Installation instructions will be updated once the plugin is listed.
+**Note:** A marketplace application has been submitted and is currently in review.
 
-**After marketplace listing:**
+**After marketplace listing (one-click install):**
 
-1. Install `uv` if not already installed (required on your machine):
+1. Install `uv` if not already on your machine:
    ```bash
    brew install uv
    ```
    No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-2. In Cursor IDE or Grok Bot, go to **Plugins → Add** (the same Add button as Gmail).
+2. In Cursor IDE or Grok Bot, go to **Plugins → Add** (the same Add button as Gmail), search for **GitHub Talent Search**, and install it.
 
-3. Search for **GitHub Talent Search** and install it.
+3. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
 
-4. When prompted, enter your GitHub personal access token (fine-grained with `read:user` and `public_repo` scopes).
+**Until marketplace approval (available now):**
 
-The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be available on your `PATH`.
-
-**Local testing (pre-marketplace):**
+Both Cursor IDE and Grok Bot can connect to the server today without waiting for marketplace approval.
 
 - **Cursor IDE:** Symlink this repository to `~/.cursor/plugins/local/github-talent-mcp/`, then reload Cursor (**Cmd/Ctrl+Shift+P** → **Reload Window**).
   ```bash
@@ -183,7 +181,12 @@ The plugin launches `uvx github-talent-mcp` as an MCP server, so `uvx` must be a
   ln -s /path/to/github-talent-mcp ~/.cursor/plugins/local/github-talent-mcp
   ```
 
-- **Grok Bot:** Connect the `github-talent` MCP server using the standard MCP connector with `uvx github-talent-mcp` and set your `GITHUB_TOKEN` environment variable.
+- **Grok Bot:** Add the MCP server as a connector:
+  - **Command:** `uvx`
+  - **Args:** `["github-talent-mcp"]`
+  - **Environment:** `GITHUB_TOKEN=github_pat_xxxxxxxx`
+  
+  This is the live setup running in production Grok Bot chats right now.
 
 #### Checking it actually works
 
