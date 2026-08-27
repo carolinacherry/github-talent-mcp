@@ -16,7 +16,9 @@ Works with **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), 
 ## Brand
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg" width="96" alt="talent-mcp mark" />
+  <img src="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-dark.svg" width="96" alt="talent-mcp mark, dark" />
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/carolinacherry/github-talent-mcp/main/assets/logo/talent-mcp-icon-light.svg" width="96" alt="talent-mcp mark, light" />
 </p>
 
 <p align="center">
