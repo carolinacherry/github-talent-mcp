@@ -1,6 +1,5 @@
 {
   "name": "github-talent-mcp",
-  "displayName": "GitHub Talent Search",
   "version": "0.5.0",
   "description": "Search, score, and rank GitHub developers for technical recruiting. Exposes 9 tools: plan_search, search_developers, get_developer_profile, rank_candidates, score_against_jd, compare_candidates, bulk_score, generate_outreach, get_repo_contributors.",
   "author": {
@@ -9,7 +8,6 @@
   "homepage": "https://github.com/carolinacherry/github-talent-mcp",
   "repository": "https://github.com/carolinacherry/github-talent-mcp",
   "license": "Apache-2.0",
-  "logo": "assets/logo/talent-mcp-icon-dark.svg",
   "keywords": [
     "talent-mcp",
     "github-talent",
@@ -18,5 +16,5 @@
     "developer sourcing",
     "technical hiring"
   ],
-  "category": "developer-tools"
+  "category": "development"
 }

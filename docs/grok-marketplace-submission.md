@@ -17,11 +17,11 @@ This document contains the draft marketplace entry for submitting `github-talent
 4. Replace `FULL_40_CHAR_COMMIT_SHA_HERE` with the actual 40-character SHA from step 2
 5. Run the validation script:
    ```bash
-   python scripts/validate-catalog.py
+   python3 scripts/validate-catalog.py
    ```
 6. If validation passes, regenerate the plugin index:
    ```bash
-   python scripts/generate-plugin-index.py
+   python3 scripts/generate-plugin-index.py
    ```
 7. Commit both files:
    ```bash
@@ -38,7 +38,7 @@ Add this to the `plugins` array in `.grok-plugin/marketplace.json`:
 {
   "name": "github-talent-mcp",
   "description": "Search, score, and rank GitHub developers for technical recruiting. 9 tools: plan_search, search_developers, get_developer_profile, rank_candidates, score_against_jd, compare_candidates, bulk_score, generate_outreach, get_repo_contributors.",
-  "category": "developer-tools",
+  "category": "development",
   "source": {
     "source": "url",
     "url": "https://github.com/carolinacherry/github-talent-mcp.git",
@@ -56,9 +56,6 @@ Add this to the `plugins` array in `.grok-plugin/marketplace.json`:
     "recruiting",
     "developer sourcing",
     "technical hiring"
-  ],
-  "domains": [
-    "github.com"
   ]
 }
 ```
@@ -92,18 +89,13 @@ The keywords are **brand-scoped** to the talent-mcp/github-talent domain:
 
 We intentionally **avoided generic keywords** like `api`, `cli`, `database`, `search` that would cause false-positive suggestions.
 
-The `domains` field includes `github.com` so Grok Build can suggest this plugin when users paste GitHub URLs.
-
 ## Testing Before Submission
 
 Before submitting to the xAI marketplace, test the plugin locally:
 
 ```bash
-# Add this repository as a marketplace source
-grok plugin marketplace add carolinacherry/github-talent-mcp
-
-# Install the plugin
-grok plugin install github-talent-mcp --trust
+# Install the plugin directly from GitHub
+grok plugin install carolinacherry/github-talent-mcp --trust
 
 # Verify it loaded
 grok plugin list

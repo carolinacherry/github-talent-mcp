@@ -246,25 +246,23 @@ left of the model picker.
 
 **Note:** This plugin has **NOT** been submitted to the xAI plugin marketplace yet. These are the install instructions for when that happens.
 
+**Prerequisites:**
+- **`uvx` on PATH** — Install via `brew install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **GitHub Personal Access Token** — Fine-grained PAT with `read:user` and `public_repo` scopes. Create at [github.com/settings/tokens](https://github.com/settings/tokens). Required for API rate limits (5,000/hr vs 60/hr unauthenticated).
+
 **Direct install from repository:**
 
-1. Install `uv` if not already on your machine:
-   ```bash
-   brew install uv
-   ```
-   No Homebrew? `curl -LsSf https://astral.sh/uv/install.sh | sh`
-
-2. Install the plugin from GitHub:
+1. Install the plugin from GitHub:
    ```bash
    grok plugin install carolinacherry/github-talent-mcp --trust
    ```
 
-3. When prompted (or in Grok settings), set your GitHub personal access token as `GITHUB_TOKEN`:
-   - Fine-grained token with `read:user` and `public_repo` scopes
-   - Create at [github.com/settings/tokens](https://github.com/settings/tokens)
-   - Required for API rate limits (5,000/hr vs 60/hr unauthenticated)
+2. Set `GITHUB_TOKEN` in Grok's MCP environment configuration:
+   - The plugin requires this environment variable to authenticate with GitHub
+   - Set it where Grok configures MCP server environments
+   - Without the token, the server runs unauthenticated and will fail mid-search
 
-4. Verify installation:
+3. Verify installation:
    ```bash
    grok plugin list
    ```
@@ -277,15 +275,15 @@ Once the plugin is accepted into the xAI marketplace catalog, you'll be able to 
 1. Type `/marketplace` in Grok Build
 2. Search for "GitHub Talent Search"
 3. Press `i` to install
-4. Provide your GitHub token when prompted
+4. Configure `GITHUB_TOKEN` in Grok's MCP settings
 
 **Marketplace submission path (not yet done):**
 
 To submit this plugin to the official marketplace:
 1. Fork [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace)
 2. Add a plugin entry to `.grok-plugin/marketplace.json` pinned to a full 40-character commit SHA
-3. Run validation: `python scripts/validate-catalog.py`
-4. Regenerate the plugin index: `python scripts/generate-plugin-index.py`
+3. Run validation: `python3 scripts/validate-catalog.py`
+4. Regenerate the plugin index: `python3 scripts/generate-plugin-index.py`
 5. Open a PR to xai-org/plugin-marketplace
 
 See `docs/grok-marketplace-submission.md` for the draft entry and detailed submission steps.
