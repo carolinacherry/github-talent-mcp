@@ -3,6 +3,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org)
 [![MCP](https://img.shields.io/badge/MCP-Model_Context_Protocol-8A2BE2)](https://modelcontextprotocol.io)
+[![Codex](https://img.shields.io/badge/Works_with-Codex-412991?logo=openai&logoColor=white)](docs/codex.md)
 [![Claude](https://img.shields.io/badge/Built_for-Claude_by_Anthropic-d4a373)](https://claude.ai)
 [![GitHub Copilot](https://img.shields.io/badge/Works_with-GitHub_Copilot-8957E5?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
 [![Cursor](https://img.shields.io/badge/Works_with-Cursor-000000)](https://cursor.com)
@@ -11,7 +12,7 @@
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
-Works with **Codex**, **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
+Works with **Codex** (CLI and desktop app, using a local plugin or direct MCP connection), **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio. [Codex setup and live test](docs/codex.md).
 
 ## Brand
 
