@@ -65,6 +65,7 @@ check("no documented tool is missing from the server", documented <= set(tools) 
 # installs a build that doesn't have what the manifest promises.
 version = re.search(r'^version = "([^"]+)"', PYPROJECT, re.MULTILINE).group(1)
 for manifest in [
+    ".codex-plugin/plugin.json",
     ".claude-plugin/plugin.json",
     ".claude-plugin/marketplace.json",
     ".cursor-plugin/plugin.json",
@@ -72,6 +73,17 @@ for manifest in [
     data = json.loads((ROOT / manifest).read_text())
     declared_v = data.get("version") or data["plugins"][0]["version"]
     check(f"{manifest} version matches pyproject", declared_v == version, f"{declared_v} vs {version}")
+
+# Codex launches a pinned release and forwards credentials from its environment.
+codex = json.loads((ROOT / ".codex-plugin/plugin.json").read_text())
+codex_server = codex["mcpServers"]["github-talent"]
+check("Codex launch version matches pyproject",
+      codex_server["args"] == [f"github-talent-mcp=={version}"])
+check("Codex forwards GITHUB_TOKEN without embedding it",
+      "GITHUB_TOKEN" in codex_server.get("env_vars", [])
+      and "GITHUB_TOKEN" not in codex_server.get("env", {}))
+check("Codex guide documents the pinned version",
+      f"github-talent-mcp=={version}" in (ROOT / "docs/codex.md").read_text())
 
 # The failure modes that actually break real runs must be documented.
 check("unauthenticated rate limit is documented", "60 without one" in README)
