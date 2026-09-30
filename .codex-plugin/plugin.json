@@ -1,0 +1,53 @@
+{
+  "name": "github-talent-mcp",
+  "version": "0.5.0",
+  "description": "Search, score, and rank GitHub developers for technical recruiting using nine MCP tools.",
+  "author": {
+    "name": "Daniel An",
+    "url": "https://github.com/carolinacherry"
+  },
+  "homepage": "https://github.com/carolinacherry/github-talent-mcp",
+  "repository": "https://github.com/carolinacherry/github-talent-mcp",
+  "license": "Apache-2.0",
+  "keywords": [
+    "recruiting",
+    "github",
+    "developer-tools",
+    "talent",
+    "mcp",
+    "sourcing"
+  ],
+  "mcpServers": {
+    "github-talent": {
+      "command": "uvx",
+      "args": [
+        "github-talent-mcp==0.5.0"
+      ],
+      "env_vars": [
+        "GITHUB_TOKEN",
+        "GITHUB_TALENT_DASHBOARD_PROMPT"
+      ],
+      "startup_timeout_sec": 60,
+      "tool_timeout_sec": 180
+    }
+  },
+  "interface": {
+    "displayName": "GitHub Talent Search",
+    "shortDescription": "Find GitHub technical talent",
+    "longDescription": "Search public GitHub profiles, inspect repository contributors, and compare candidates against a job description. Requires uv and a GitHub token in the Codex launch environment.",
+    "developerName": "Daniel An",
+    "category": "Business & Operations",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/carolinacherry/github-talent-mcp",
+    "composerIcon": "./assets/logo/talent-mcp-icon-dark.png",
+    "logo": "./assets/logo/talent-mcp-icon-light.png",
+    "logoDark": "./assets/logo/talent-mcp-icon-dark.png",
+    "defaultPrompt": [
+      "Find GitHub developers for this job description.",
+      "Compare these GitHub candidates against my job description.",
+      "Find contributors to a repository for my engineering role."
+    ]
+  }
+}

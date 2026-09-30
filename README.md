@@ -11,7 +11,7 @@
 
 MCP server that searches, scores, and ranks GitHub developers for technical recruiting.
 
-Works with **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
+Works with **Codex**, **Claude** (Code & Desktop), **GitHub Copilot** (CLI & desktop app), and **Cursor** (IDE & Grok Bot) — any MCP client that speaks stdio.
 
 ## Brand
 
@@ -77,8 +77,9 @@ Combined score = activity × 0.4 + relevance × 0.6. Relevance is keyword overla
 
 ### 1. Install `uv`
 
-The server runs through `uvx`, which downloads and launches it for you — no clone, no
-virtualenv, and you get updates automatically.
+The server runs through `uvx`, which downloads and launches it for you — no clone or
+virtualenv needed for a direct MCP connection. The Codex plugin pins the tested package
+version; the other examples below use the unpinned package.
 
 ```bash
 brew install uv
@@ -103,6 +104,29 @@ Go to [github.com/settings/tokens](https://github.com/settings/tokens) and creat
 Copy the token — you cannot view it again after leaving the page.
 
 ### 3. Connect it
+
+#### Codex
+
+For a direct MCP connection, add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.github-talent]
+command = "uvx"
+args = ["github-talent-mcp==0.5.0"]
+env_vars = ["GITHUB_TOKEN"]
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+```
+
+Set `GITHUB_TOKEN` in the environment that launches Codex, then start a new chat.
+Keep the token out of repository files. You should see 9 tools under `github-talent`;
+verify that a search and scoring call return real GitHub data.
+
+To install this repository as a local Codex plugin instead, use its
+[`.codex-plugin/plugin.json`](.codex-plugin/plugin.json) manifest and follow the
+[Codex plugin installation and live test guide](docs/codex.md). The plugin also pins
+the tested `github-talent-mcp==0.5.0` package. Local installation does not list the
+plugin in the public directory.
 
 #### GitHub Copilot (CLI and desktop app)
 
@@ -444,6 +468,14 @@ This tool scores **public GitHub activity** as *one* signal for technical sourci
 - **GitHub is not the whole engineer.** Public activity is strong evidence of *technical* work but blind to private-repo and internal/enterprise contributions, and to non-GitHub ecosystems (mailing lists, GitLab, etc.). It **cannot** verify people-management or leadership history — confirm those off-GitHub. (The reputation floor exists precisely because low recent activity ≠ low capability.)
 - **Use it as a lead generator, not a filter.** Public OSS visibility correlates with free time, tenure, and circumstance — not just skill — and that skews across demographics. Treat scores as a starting point for outreach and human judgment. Don't use them to automatically exclude candidates, and always pair them with equitable, role-relevant evaluation.
 - **Data is live and rate-limited.** Scores reflect GitHub at query time and shift as activity changes; an unauthenticated server is capped at 60 requests/hour.
+
+## Support
+
+Use [GitHub Issues](https://github.com/carolinacherry/github-talent-mcp/issues) for
+project questions and bug reports. This is an open-source project with no dedicated
+email support or guaranteed response times. Issues are public; remove tokens,
+private job descriptions, and sensitive personal information from examples or logs
+before posting.
 
 ## License
 
