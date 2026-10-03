@@ -269,7 +269,7 @@ left of the model picker.
 
 #### Grok Build
 
-**Note:** This plugin has **NOT** been submitted to the xAI plugin marketplace yet. These are the install instructions for when that happens.
+**Note:** A marketplace submission has been opened as [PR #505](https://github.com/xai-org/plugin-marketplace/pull/505) to the xAI plugin marketplace, but the plugin is not yet accepted or listed. These are the install instructions for when marketplace approval is complete.
 
 **Prerequisites:**
 - **`uvx` on PATH** — Install via `brew install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
@@ -302,16 +302,11 @@ Once the plugin is accepted into the xAI marketplace catalog, you'll be able to 
 3. Press `i` to install
 4. Configure `GITHUB_TOKEN` in Grok's MCP settings
 
-**Marketplace submission path (not yet done):**
+**Marketplace submission status:**
 
-To submit this plugin to the official marketplace:
-1. Fork [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace)
-2. Add a plugin entry to `.grok-plugin/marketplace.json` pinned to a full 40-character commit SHA
-3. Run validation: `python3 scripts/validate-catalog.py`
-4. Regenerate the plugin index: `python3 scripts/generate-plugin-index.py`
-5. Open a PR to xai-org/plugin-marketplace
+A submission has been opened as [PR #505](https://github.com/xai-org/plugin-marketplace/pull/505) to the xAI plugin marketplace (opened 2026-09-02, still under review). Once accepted, the plugin will be browseable and installable directly from Grok Build. Until then, use the direct install path above.
 
-See `docs/grok-marketplace-submission.md` for the draft entry and detailed submission steps.
+See `docs/grok-marketplace-submission.md` for the submission entry and status details.
 
 #### Checking it actually works
 

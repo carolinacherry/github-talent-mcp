@@ -4,7 +4,7 @@ This document contains the draft marketplace entry for submitting `github-talent
 
 ## Status
 
-**NOT YET SUBMITTED** — This is a draft entry ready to be added to `.grok-plugin/marketplace.json` in the xai-org/plugin-marketplace repository.
+**SUBMITTED** — A pull request has been opened as [PR #505](https://github.com/xai-org/plugin-marketplace/pull/505) to add this plugin to the xAI marketplace catalog (opened 2026-09-02). The PR is still under review and has not yet been accepted or merged. Once approved, the plugin will be listed in the marketplace.
 
 ## Submission Steps
 
